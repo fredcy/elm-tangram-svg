@@ -11,13 +11,9 @@ type alias Model =
   }
 
 
-init : Position -> ( Model, Cmd a )
+init : Position -> Model
 init position =
-  ( Model
-      position
-      Nothing
-  , Cmd.none
-  )
+  Model position Nothing
 
 
 getPosition : Model -> Position

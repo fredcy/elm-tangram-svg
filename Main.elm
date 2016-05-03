@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Dict exposing (Dict)
 import Html
 import Html.App as Html
 import Svg exposing (..)
@@ -20,33 +21,50 @@ main =
     }
 
 
+type alias PieceName =
+  String
+
+
 type alias Model =
-  { piece : Piece.Model
+  { pieces : Dict PieceName Piece.Model
   }
 
 
 init : ( Model, Cmd a )
 init =
   let
-    ( piece, cmd ) =
-      Piece.init (Piece.Position 100 100)
+    pieces =
+      Dict.singleton "one" (Piece.init (Piece.Position 100 100))
   in
-    ( { piece = piece }, cmd )
+    ( { pieces = pieces }, Cmd.none )
 
 
 type Msg
-  = PieceMsg Piece.Msg
+  = PieceMsg PieceName Piece.Msg
 
+
+updatePiece : Piece.Msg -> Maybe Piece -> Maybe Piece
+updatePiece msg pieceMaybe =
+  Maybe.map (Piece.update pieceMsg) pieceMaybe
+       
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
-    PieceMsg pieceMsg ->
+    PieceMsg pieceName pieceMsg ->
       let
-        ( piece', cmd ) =
-          Piece.update pieceMsg model.piece
+        pieces' = Dict.update pieceName (updatePiece pieceMsg) pieces
       in
-        ( { model | piece = piece' }, cmd |> Cmd.map PieceMsg )
+        case pieceMaybe of
+          Nothing ->
+            Debug.crash "nothing for piece"
+
+          Just piece ->
+            let
+              ( piece', cmd ) = Piece.update pieceMsg piece
+              pieces 
+            in
+              ( { model | piece = piece' }, cmd |> Cmd.map PieceMsg )
 
 
 subscriptions : Model -> Sub Msg
