@@ -2,13 +2,12 @@ module Main exposing (..)
 
 import Html
 import Html.App as Html
-import Html.Attributes as Html
-import Html.Events as Html
-import Json.Decode as Json
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Svg.Events exposing (..)
-import Mouse exposing (Position)
+import Piece.Model as Piece
+import Piece.Update as Piece
+import Piece.View as Piece
+import Piece.Types as Piece
 
 
 main : Program Never
@@ -22,92 +21,37 @@ main =
 
 
 type alias Model =
-  { position : Position
-  , drag : Maybe Drag
+  { piece : Piece.Model
   }
-
-
-type Drag
-  = DragStarting
-  | Dragging
-      { start : Position
-      , current : Position
-      }
 
 
 init : ( Model, Cmd a )
 init =
-  ( Model (Position 10 10) Nothing
-  , Cmd.none
-  )
-
-
-
--- update
+  let
+    ( piece, cmd ) =
+      Piece.init (Piece.Position 100 100)
+  in
+    ( { piece = piece }, cmd )
 
 
 type Msg
-  = DragStart
-  | DragAt Position
-  | DragEnd Position
-  | MouseDown Position
+  = PieceMsg Piece.Msg
 
 
-update : Msg -> Model -> ( Model, Cmd c )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-  let
-    model' =
-      updateHelp msg model |> Debug.log "model"
-  in
-    ( model', Cmd.none )
-
-
-updateHelp : Msg -> Model -> Model
-updateHelp msg ({ position, drag } as model) =
-  case msg |> Debug.log "msg" of
-    DragStart ->
-      { model | drag = Just DragStarting }
-
-    DragAt xy ->
+  case msg of
+    PieceMsg pieceMsg ->
       let
-        drag =
-          case model.drag of
-            Nothing ->
-              Nothing
-
-            Just DragStarting ->
-              Just (Dragging { start = xy, current = xy })
-
-            Just (Dragging { start }) ->
-              Just (Dragging { start = start, current = xy })
+        ( piece', cmd ) =
+          Piece.update pieceMsg model.piece
       in
-        { model | drag = drag }
-
-    DragEnd _ ->
-      { model | position = getPosition model, drag = Nothing }
-
-    MouseDown pos ->
-      let
-        -- [naming the following as `drag` causes a runtime crash]
-        drag' =
-          case drag of
-            Just DragStarting ->
-              Just (Dragging { start = pos, current = pos })
-
-            _ ->
-              drag
-      in
-        { model | drag = drag' }
+        ( { model | piece = piece' }, cmd |> Cmd.map PieceMsg )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  case model.drag of
-    Nothing ->
-      Mouse.downs MouseDown
-
-    Just _ ->
-      Sub.batch [ Mouse.downs MouseDown, Mouse.moves DragAt, Mouse.ups DragEnd ]
+  Piece.subscriptions model.piece |> Sub.map PieceMsg
 
 
 
@@ -126,50 +70,6 @@ view model =
 scene : Model -> Html.Html Msg
 scene model =
   Svg.svg
-    [ width "200", height "200" ]
-    [ roundRect model
-    , theCircle
+    [ width "600", height "600" ]
+    [ Piece.view model.piece |> Html.map PieceMsg
     ]
-
-
-getPosition : Model -> Position
-getPosition { position, drag } =
-  case drag of
-    Nothing ->
-      position
-
-    Just (Dragging { start, current }) ->
-      Position
-        (position.x + current.x - start.x)
-        (position.y + current.y - start.y)
-
-    Just DragStarting ->
-      position
-
-
-roundRect : Model -> Svg Msg
-roundRect model =
-  let
-    realPosition =
-      getPosition model
-  in
-    rect
-      [ x <| toString realPosition.x
-      , y <| toString realPosition.y
-      , width "100"
-      , height "100"
-      , rx "15"
-      , ry "15"
-      , onMouseDown DragStart
-      ]
-      []
-
-
-theCircle =
-  circle
-    [ cx "60"
-    , cy "160"
-    , r "40"
-    , fill "red"
-    ]
-    []
