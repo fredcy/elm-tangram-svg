@@ -40,8 +40,8 @@ init : ( Model, Cmd a )
 init =
   let
     pieces =
-      [ ( "one", (Piece.init (Piece.Triangle "red" 30.0) (Piece.Position 100 100) 0) )
-      , ( "two", (Piece.init (Piece.Triangle "orange" 30.0) (Piece.Position 200 200) 45) )
+      [ ( "one", (Piece.init (Piece.Triangle "red" 100.0) (Piece.Position 100 100) 0) )
+      , ( "two", (Piece.init (Piece.Triangle "orange" 100.0) (Piece.Position 200 200) 45) )
       ]
   in
     ( { pieces = pieces, height = 600, width = 600 }, Cmd.none )
@@ -62,7 +62,7 @@ update msg model =
         ( { model | pieces = pieces' }, Cmd.batch cmds )
 
 
-{-| Fold over the list of compoents and apply the msg to the component piece
+{-| Fold over the list of components and apply the msg to the component piece
 with the matching name, collecting the updated models and resulting commands
 into separate lists as needed for updating the main model and batching the
 commands.

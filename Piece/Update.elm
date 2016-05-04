@@ -14,7 +14,7 @@ update msg model =
 
 
 updateHelp : Msg -> Model -> Model
-updateHelp msg ({ position, drag } as model) =
+updateHelp msg model =
   case msg of
     DragStart xy ->
       { model | drag = Just (Dragging { start = xy, current = xy }) }
@@ -24,12 +24,12 @@ updateHelp msg ({ position, drag } as model) =
         drag =
           case model.drag of
             Nothing ->
-              Nothing |> Debug.log "bogus"
+              Nothing |> Debug.log "bogus drag when not dragging?"
 
             Just (Dragging { start }) ->
               Just (Dragging { start = start, current = xy })
       in
         { model | drag = drag }
 
-    DragEnd _ ->
+    DragEnd xy ->
       { model | position = getPosition model, drag = Nothing }
