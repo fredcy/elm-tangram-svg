@@ -7,7 +7,7 @@ import Svg.Attributes as Svg exposing (..)
 import Task
 import VirtualDom
 import Window
-
+import Keyboard
 
 --import Svg.Lazy
 
@@ -54,6 +54,7 @@ init =
 type Msg
   = PieceMsg Name Piece.Msg
   | WindowSize Window.Size
+  | KeyDown Int
   | Error
 
 
@@ -81,6 +82,8 @@ update msg model =
     Error ->
       ( model, Cmd.none )
 
+    KeyDown keycode ->
+      ( model, Cmd.none )
 
 {-| Fold over the list of components and apply the msg to the component piece
 with the matching name, collecting the updated models and resulting commands
@@ -113,8 +116,11 @@ subscriptions model =
 
     reSize =
       Window.resizes WindowSize
+
+    keyDowns =
+      Keyboard.keydowns KeyDown
   in
-    reSize :: List.map mapSubs model.pieces |> Sub.batch
+    keyDowns :: reSize :: List.map mapSubs model.pieces |> Sub.batch
 
 
 
