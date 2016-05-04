@@ -29,16 +29,21 @@ getPosition { position, drag } =
     _ ->
       position
 
+
 getRotation : Model -> Rotation
 getRotation { rotation, drag } =
   case drag of
     Just (Rotating { start, current }) ->
-         rotation + toFloat (current.x - start.x)
+      let
+        angleR = atan2 (toFloat (current.y - start.y)) (toFloat (current.x - start.x))
+        angleD = (angleR / (2 * pi)) * 360
+      in
+        rotation + angleD
 
     _ ->
       rotation
 
-        
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
   case model.drag of
