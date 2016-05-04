@@ -32,3 +32,4 @@ type alias Rotation =
 
 type Shape
   = Triangle Color Scale
+  | Square Color Scale

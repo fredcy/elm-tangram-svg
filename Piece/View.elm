@@ -23,6 +23,9 @@ view model =
       [ case model.shape of
           Triangle color scale ->
             triangle color scale model.rotation ( toFloat realPosition.x, toFloat realPosition.y )
+
+          Square color scale ->
+            square color scale model.rotation ( toFloat realPosition.x, toFloat realPosition.y )
       ]
 
 
@@ -30,8 +33,26 @@ triangle : String -> Float -> Float -> ( Float, Float ) -> Svg Msg
 triangle color scale rotation position =
   let
     shape =
-      -- [ ( -0.5, -0.5 ), ( 0.5, -0.5 ), ( -0.5, 0.5 ) ]
       [ (0, -0.5), (1, 0.5), (-1, 0.5)]
+
+    vertices =
+      shape |> List.map (scalePoint scale >> rotatePoint (degrees rotation) >> translatePoint position)
+  in
+    Svg.polygon
+      [ points <| pointsToString vertices
+      , fill color
+      , stroke "gray"
+      , strokeWidth (toString (8))
+      , strokeLinejoin "round"
+      ]
+      []
+
+
+square : String -> Float -> Float -> ( Float, Float ) -> Svg Msg
+square color scale rotation position =
+  let
+    shape =
+      [ (0, -0.5), (0.5, 0), (0, 0.5), (-0.5, 0) ]
 
     vertices =
       shape |> List.map (scalePoint scale >> rotatePoint (degrees rotation) >> translatePoint position)

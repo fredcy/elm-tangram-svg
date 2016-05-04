@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Char exposing (KeyCode)
 import Html
 import Html.App as Html
 import Svg exposing (..)
@@ -8,6 +9,7 @@ import Task
 import VirtualDom
 import Window
 import Keyboard
+
 
 --import Svg.Lazy
 
@@ -35,6 +37,7 @@ type alias Name =
 type alias Model =
   { pieces : List ( Name, Piece.Model )
   , size : Window.Size
+  , shift : Bool
   }
 
 
@@ -44,9 +47,13 @@ init =
     pieces =
       [ ( "bigTri1", (Piece.init (Piece.Triangle (Colors.toCss Colors.elmTurquoise) 100.0) (Piece.Position 200 300) 0) )
       , ( "bigTri2", (Piece.init (Piece.Triangle (Colors.toCss Colors.elmGray) 100.0) (Piece.Position 150 250) 90) )
+      , ( "medTri",  (Piece.init (Piece.Triangle (Colors.toCss Colors.elmTurquoise) (100.0 / sqrt 2)) (Piece.Position 275 175) 45) )
+      , ( "smTri1",  (Piece.init (Piece.Triangle (Colors.toCss Colors.elmOrange) (100.0 / 2)) (Piece.Position 275 300) -90) )
+      , ( "smTri2",  (Piece.init (Piece.Triangle (Colors.toCss Colors.elmOrange) (100.0 / 2)) (Piece.Position 200 225) 180) )
+      , ( "square",  (Piece.init (Piece.Square (Colors.toCss Colors.elmGreen) 100.0) (Piece.Position 250 250) 180) )          
       ]
   in
-    ( { pieces = pieces, size = Window.Size 600 600 }
+    ( { pieces = pieces, size = Window.Size 600 600, shift = False }
     , Task.perform (always Error) WindowSize Window.size
     )
 
@@ -54,7 +61,8 @@ init =
 type Msg
   = PieceMsg Name Piece.Msg
   | WindowSize Window.Size
-  | KeyDown Int
+  | KeyDown KeyCode
+  | KeyUp KeyCode
   | Error
 
 
@@ -83,7 +91,17 @@ update msg model =
       ( model, Cmd.none )
 
     KeyDown keycode ->
-      ( model, Cmd.none )
+      if keycode == 16 then
+        ( { model | shift = True }, Cmd.none )
+      else
+        ( model, Cmd.none )
+
+    KeyUp keycode ->
+      if keycode == 16 then
+        ( { model | shift = False }, Cmd.none )
+      else
+        ( model, Cmd.none )
+
 
 {-| Fold over the list of components and apply the msg to the component piece
 with the matching name, collecting the updated models and resulting commands
@@ -119,8 +137,11 @@ subscriptions model =
 
     keyDowns =
       Keyboard.keydowns KeyDown
+
+    keyUps =
+      Keyboard.keyups KeyUp
   in
-    keyDowns :: reSize :: List.map mapSubs model.pieces |> Sub.batch
+    keyUps :: keyDowns :: reSize :: List.map mapSubs model.pieces |> Sub.batch
 
 
 
@@ -166,6 +187,7 @@ debugInfo model =
   Html.div
     []
     [ Html.text <| "size = " ++ toString model.size
+    , Html.text <| "shift = " ++ toString model.shift
     , Html.ul
         []
         (List.map (\item -> Html.li [] [ (Html.text << toString) item ]) model.pieces)
