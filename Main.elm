@@ -4,6 +4,7 @@ import Html
 import Html.App as Html
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+--import Svg.Lazy
 import Piece.Model as Piece
 import Piece.Update as Piece
 import Piece.View as Piece
@@ -33,7 +34,9 @@ init : ( Model, Cmd a )
 init =
   let
     pieces =
-      [ ( "one", (Piece.init (Piece.Position 100 100)) ) ]
+      [ ( "one", (Piece.init (Piece.Position 100 100)) )
+      , ( "two", (Piece.init (Piece.Position 200 200)) )
+      ]
   in
     ( { pieces = pieces }, Cmd.none )
 
@@ -44,7 +47,7 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-  case msg of
+  case msg |> Debug.log "msg" of
     PieceMsg name pieceMsg ->
       let
         ( pieces', cmds ) =
@@ -62,7 +65,7 @@ updatePieces name msg items =
           ( piece', cmd ) =
             Piece.update msg piece
         in
-          ( ( name, piece' ) :: items, (Cmd.map (PieceMsg name) cmd) :: cmds )
+          ( ( pieceName, piece' ) :: items, Cmd.map (PieceMsg name) cmd :: cmds )
       else
         ( item :: items, cmds )
   in

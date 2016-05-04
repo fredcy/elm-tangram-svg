@@ -26,21 +26,3 @@ view model =
 ts : Int -> String
 ts i =
   toString i
-
-
-roundRect : Model -> Svg Msg
-roundRect model =
-  let
-    realPosition =
-      getPosition model
-  in
-    rect
-      [ x <| toString realPosition.x
-      , y <| toString realPosition.y
-      , width "100"
-      , height "100"
-      , rx "15"
-      , ry "15"
-      , onMouseDown DragStart
-      ]
-      []
