@@ -29,15 +29,12 @@ getPosition { position, drag } =
         (position.x + current.x - start.x)
         (position.y + current.y - start.y)
 
-    Just DragStarting ->
-      position
-
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
   case model.drag of
     Nothing ->
-      Mouse.downs MouseDown
+      Sub.none
 
     Just _ ->
-      Sub.batch [ Mouse.downs MouseDown, Mouse.moves DragAt, Mouse.ups DragEnd ]
+      Sub.batch [ Mouse.moves DragAt, Mouse.ups DragEnd ]

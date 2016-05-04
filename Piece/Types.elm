@@ -6,18 +6,16 @@ type alias Position =
 
 
 type Drag
-  = DragStarting
-  | Dragging
+  = Dragging
       { start : Position
       , current : Position
       }
 
 
 type Msg
-  = DragStart
+  = DragStart Position
   | DragAt Position
   | DragEnd Position
-  | MouseDown Position
 
 
 type alias Color =

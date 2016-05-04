@@ -1,10 +1,12 @@
 module Piece.View exposing (view)
 
+import Json.Decode as Json
+import Mouse
 import Piece.Model exposing (Model, getPosition)
 import Piece.Types exposing (Msg(DragStart), Shape(..))
-import Svg exposing (Svg, circle)
+import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
-import Svg.Events exposing (onMouseDown)
+import VirtualDom
 
 
 view : Model -> Svg Msg
@@ -17,7 +19,7 @@ view model =
       "svg"
       [ x (toString realPosition.x)
       , y (toString realPosition.y)
-      , onMouseDown DragStart
+      , VirtualDom.on "mousedown" (Json.map DragStart Mouse.position)
       ]
       [ case model.shape of
           Triangle color scale ->

@@ -16,8 +16,8 @@ update msg model =
 updateHelp : Msg -> Model -> Model
 updateHelp msg ({ position, drag } as model) =
   case msg of
-    DragStart ->
-      { model | drag = Just DragStarting }
+    DragStart xy ->
+      { model | drag = Just (Dragging { start = xy, current = xy }) }
 
     DragAt xy ->
       let
@@ -26,9 +26,6 @@ updateHelp msg ({ position, drag } as model) =
             Nothing ->
               Nothing |> Debug.log "bogus"
 
-            Just DragStarting ->
-              Just (Dragging { start = xy, current = xy }) |> Debug.log "bogus?"
-
             Just (Dragging { start }) ->
               Just (Dragging { start = start, current = xy })
       in
@@ -36,16 +33,3 @@ updateHelp msg ({ position, drag } as model) =
 
     DragEnd _ ->
       { model | position = getPosition model, drag = Nothing }
-
-    MouseDown pos ->
-      let
-        -- [naming the following as `drag` causes a runtime crash]
-        drag' =
-          case drag of
-            Just DragStarting ->
-              Just (Dragging { start = pos, current = pos })
-
-            _ ->
-              drag
-      in
-        { model | drag = drag' }
