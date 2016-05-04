@@ -21,15 +21,24 @@ init shape position rotation =
 getPosition : Model -> Position
 getPosition { position, drag } =
   case drag of
-    Nothing ->
-      position
-
     Just (Dragging { start, current }) ->
       Position
         (position.x + current.x - start.x)
         (position.y + current.y - start.y)
 
+    _ ->
+      position
 
+getRotation : Model -> Rotation
+getRotation { rotation, drag } =
+  case drag of
+    Just (Rotating { start, current }) ->
+         rotation + toFloat (current.x - start.x)
+
+    _ ->
+      rotation
+
+        
 subscriptions : Model -> Sub Msg
 subscriptions model =
   case model.drag of

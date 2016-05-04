@@ -1,7 +1,10 @@
 module Colors exposing (..)
 
-import Color exposing (Color, rgb)
+import Color exposing (rgb)
 
+
+type alias Color = Color.Color
+                 
 
 elmGreen : Color
 elmGreen =

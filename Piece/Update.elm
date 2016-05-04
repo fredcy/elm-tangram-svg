@@ -1,23 +1,26 @@
 module Piece.Update exposing (..)
 
 import Piece.Types exposing (..)
-import Piece.Model exposing (Model, getPosition)
+import Piece.Model exposing (Model, getPosition, getRotation)
 
 
-update : Msg -> Model -> ( Model, Cmd c )
-update msg model =
+update : Context -> Msg -> Model -> ( Model, Cmd c )
+update context msg model =
   let
     model' =
-      updateHelp msg model
+      updateHelp context msg model
   in
     ( model', Cmd.none )
 
 
-updateHelp : Msg -> Model -> Model
-updateHelp msg model =
+updateHelp : Context -> Msg -> Model -> Model
+updateHelp context msg model =
   case msg of
     DragStart xy ->
-      { model | drag = Just (Dragging { start = xy, current = xy }) }
+      if context.shift then
+        { model | drag = Just (Rotating { start = xy, current = xy }) }
+      else
+        { model | drag = Just (Dragging { start = xy, current = xy }) }
 
     DragAt xy ->
       let
@@ -28,8 +31,15 @@ updateHelp msg model =
 
             Just (Dragging { start }) ->
               Just (Dragging { start = start, current = xy })
+
+            Just (Rotating { start }) ->
+              Just (Rotating { start = start, current = xy })
       in
         { model | drag = drag }
 
     DragEnd xy ->
-      { model | position = getPosition model, drag = Nothing }
+      { model
+        | position = getPosition model
+        , rotation = getRotation model
+        , drag = Nothing
+      }

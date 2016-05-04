@@ -1,8 +1,9 @@
 module Piece.View exposing (view)
 
+import Colors
 import Json.Decode as Json
 import Mouse
-import Piece.Model exposing (Model, getPosition)
+import Piece.Model exposing (Model, getPosition, getRotation)
 import Piece.Types exposing (Msg(DragStart), Shape(..))
 import String
 import Svg exposing (Svg)
@@ -15,6 +16,8 @@ view model =
   let
     realPosition =
       getPosition model
+    realRotation =
+      getRotation model
   in
     Svg.node
       "svg"
@@ -22,13 +25,13 @@ view model =
       ]
       [ case model.shape of
           Triangle color scale ->
-            polygon trianglePoints color scale model.rotation ( toFloat realPosition.x, toFloat realPosition.y )
+            polygon trianglePoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y )
 
           Square color scale ->
-            polygon squarePoints color scale model.rotation ( toFloat realPosition.x, toFloat realPosition.y )
+            polygon squarePoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y )
           
           Parallelogram color scale ->
-            polygon paraPoints color scale model.rotation ( toFloat realPosition.x, toFloat realPosition.y )
+            polygon paraPoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y )
       ]
 
 
@@ -44,7 +47,7 @@ paraPoints =
   [ ( 0.25, -0.25 ), ( -0.75, -0.25 ), ( -0.25, 0.25 ), ( 0.75, 0.25 ) ]
 
 
-polygon : List ( Float, Float ) -> String -> Float -> Float -> ( Float, Float ) -> Svg Msg
+polygon : List ( Float, Float ) -> Colors.Color -> Float -> Float -> ( Float, Float ) -> Svg Msg
 polygon shape color scale rotation position =
   let
     vertices =
@@ -52,7 +55,7 @@ polygon shape color scale rotation position =
   in
     Svg.polygon
       [ points <| pointsToString vertices
-      , fill color
+      , fill <| Colors.toCss color
       , stroke "gray"
       , strokeWidth (toString (8))
       , strokeLinejoin "round"

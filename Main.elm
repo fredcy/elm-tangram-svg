@@ -45,16 +45,19 @@ init : ( Model, Cmd Msg )
 init =
   let
     pieces =
-      [ ( "bigTri1", (Piece.init (Piece.Triangle (Colors.toCss Colors.elmTurquoise) 100.0) (Piece.Position 200 300) 0) )
-      , ( "bigTri2", (Piece.init (Piece.Triangle (Colors.toCss Colors.elmGray) 100.0) (Piece.Position 150 250) 90) )
-      , ( "medTri", (Piece.init (Piece.Triangle (Colors.toCss Colors.elmTurquoise) (100.0 / sqrt 2)) (Piece.Position 275 175) 45) )
-      , ( "smTri1", (Piece.init (Piece.Triangle (Colors.toCss Colors.elmOrange) (100.0 / 2)) (Piece.Position 275 300) -90) )
-      , ( "smTri2", (Piece.init (Piece.Triangle (Colors.toCss Colors.elmOrange) (100.0 / 2)) (Piece.Position 200 225) 180) )
-      , ( "square", (Piece.init (Piece.Square (Colors.toCss Colors.elmGreen) 100.0) (Piece.Position 250 250) 180) )
-      , ( "para", (Piece.init (Piece.Parallelogram (Colors.toCss Colors.elmGreen) 100.0) (Piece.Position 175 175) 180) )
+      [ ( "bigTri1", (Piece.init (Piece.Triangle (Colors.elmTurquoise) 100.0) (Piece.Position 200 300) 0) )
+      , ( "bigTri2", (Piece.init (Piece.Triangle (Colors.elmGray) 100.0) (Piece.Position 150 250) 90) )
+      , ( "medTri", (Piece.init (Piece.Triangle (Colors.elmTurquoise) (100.0 / sqrt 2)) (Piece.Position 275 175) 45) )
+      , ( "smTri1", (Piece.init (Piece.Triangle (Colors.elmOrange) (100.0 / 2)) (Piece.Position 275 300) -90) )
+      , ( "smTri2", (Piece.init (Piece.Triangle (Colors.elmOrange) (100.0 / 2)) (Piece.Position 200 225) 180) )
+      , ( "square", (Piece.init (Piece.Square (Colors.elmGreen) 100.0) (Piece.Position 250 250) 180) )
+      , ( "para", (Piece.init (Piece.Parallelogram (Colors.elmGreen) 100.0) (Piece.Position 175 175) 180) )
       ]
   in
-    ( { pieces = pieces, size = Window.Size 600 600, shift = False }
+    ( { pieces = pieces
+      , size = Window.Size 600 600
+      , shift = False
+      }
     , Task.perform (always Error) WindowSize Window.size
     )
 
@@ -67,13 +70,17 @@ type Msg
   | Error
 
 
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-  case msg |> Debug.log "msg" of
+  case msg of
     PieceMsg name pieceMsg ->
       let
+        context =
+          { shift = model.shift }
+
         ( pieces', cmds ) =
-          updatePieces name pieceMsg model.pieces
+          updatePieces name pieceMsg context model.pieces
       in
         ( { model | pieces = pieces' }, Cmd.batch cmds )
 
@@ -109,14 +116,14 @@ with the matching name, collecting the updated models and resulting commands
 into separate lists as needed for updating the main model and batching the
 commands.
 -}
-updatePieces : Name -> Piece.Msg -> List ( Name, Piece.Model ) -> ( List ( Name, Piece.Model ), List (Cmd Msg) )
-updatePieces name msg items =
+updatePieces : Name -> Piece.Msg -> Piece.Context -> List ( Name, Piece.Model ) -> ( List ( Name, Piece.Model ), List (Cmd Msg) )
+updatePieces name msg context items =
   let
     updatePiece (( pieceName, piece ) as item) ( items, cmds ) =
       if pieceName == name then
         let
           ( piece', cmd ) =
-            Piece.update msg piece
+            Piece.update context msg piece
         in
           ( ( pieceName, piece' ) :: items, Cmd.map (PieceMsg name) cmd :: cmds )
       else
@@ -154,6 +161,7 @@ view model =
   Html.div
     []
     [ Html.h1 [] [ Html.text "SVG drag and drop" ]
+    , Html.div [] [ Html.text "Drag to move, shift-drag to rotate" ]
     , scene model
     , debugInfo model
     ]
