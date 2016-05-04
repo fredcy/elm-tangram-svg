@@ -30,7 +30,8 @@ triangle : String -> Float -> Float -> ( Float, Float ) -> Svg Msg
 triangle color scale rotation position =
   let
     shape =
-      [ ( -0.5, -0.5 ), ( 0.5, -0.5 ), ( -0.5, 0.5 ) ]
+      -- [ ( -0.5, -0.5 ), ( 0.5, -0.5 ), ( -0.5, 0.5 ) ]
+      [ (0, -0.5), (1, 0.5), (-1, 0.5)]
 
     vertices =
       shape |> List.map (scalePoint scale >> rotatePoint (degrees rotation) >> translatePoint position)
@@ -39,7 +40,8 @@ triangle color scale rotation position =
       [ points <| pointsToString vertices
       , fill color
       , stroke "gray"
-      , strokeWidth (toString (4.0 / scale))
+      , strokeWidth (toString (8))
+      , strokeLinejoin "round"
       ]
       []
 
@@ -52,9 +54,6 @@ rotatePoint angle ( x, y ) =
 
     y' =
       x * sin angle + y * cos angle
-
-    _ =
-      Debug.log (toString ( angle, ( x, y ) )) ( x', y' )
   in
     ( x', y' )
 

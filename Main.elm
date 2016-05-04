@@ -4,11 +4,14 @@ import Html
 import Html.App as Html
 import Svg exposing (..)
 import Svg.Attributes as Svg exposing (..)
+import Task
 import VirtualDom
+import Window
 
 
 --import Svg.Lazy
 
+import Colors
 import Piece.Model as Piece
 import Piece.Update as Piece
 import Piece.View as Piece
@@ -31,24 +34,27 @@ type alias Name =
 
 type alias Model =
   { pieces : List ( Name, Piece.Model )
-  , height : Int
-  , width : Int
+  , size : Window.Size
   }
 
 
-init : ( Model, Cmd a )
+init : ( Model, Cmd Msg )
 init =
   let
     pieces =
-      [ ( "one", (Piece.init (Piece.Triangle "red" 100.0) (Piece.Position 100 100) 0) )
-      , ( "two", (Piece.init (Piece.Triangle "orange" 100.0) (Piece.Position 200 200) 45) )
+      [ ( "bigTri1", (Piece.init (Piece.Triangle (Colors.toCss Colors.elmTurquoise) 100.0) (Piece.Position 200 300) 0) )
+      , ( "bigTri2", (Piece.init (Piece.Triangle (Colors.toCss Colors.elmGray) 100.0) (Piece.Position 150 250) 90) )
       ]
   in
-    ( { pieces = pieces, height = 600, width = 600 }, Cmd.none )
+    ( { pieces = pieces, size = Window.Size 600 600 }
+    , Task.perform (always Error) WindowSize Window.size
+    )
 
 
 type Msg
   = PieceMsg Name Piece.Msg
+  | WindowSize Window.Size
+  | Error
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -60,6 +66,20 @@ update msg model =
           updatePieces name pieceMsg model.pieces
       in
         ( { model | pieces = pieces' }, Cmd.batch cmds )
+
+    WindowSize wsize ->
+      let
+        -- Allow for horizontal margin (?) and give vertical room for additional content
+        width =
+          wsize.width - 16
+
+        height =
+          wsize.height - 300
+      in
+        ( { model | size = Window.Size width height }, Cmd.none )
+
+    Error ->
+      ( model, Cmd.none )
 
 
 {-| Fold over the list of components and apply the msg to the component piece
@@ -90,8 +110,11 @@ subscriptions model =
   let
     mapSubs ( name, piece ) =
       Piece.subscriptions piece |> Sub.map (PieceMsg name)
+
+    reSize =
+      Window.resizes WindowSize
   in
-    List.map mapSubs model.pieces |> Sub.batch
+    reSize :: List.map mapSubs model.pieces |> Sub.batch
 
 
 
@@ -111,10 +134,10 @@ view model =
 scene : Model -> Html.Html Msg
 scene model =
   Svg.svg
-    [ width <| toString model.width
-    , height <| toString model.height
+    [ width <| toString model.size.width
+    , height <| toString model.size.height
     ]
-    (background model.width model.height :: (List.map pieceView model.pieces))
+    (background model.size.width model.size.height :: (List.map pieceView model.pieces))
 
 
 pieceView : ( Name, Piece.Model ) -> Svg.Svg Msg
@@ -136,7 +159,7 @@ debugInfo : Model -> Html.Html Msg
 debugInfo model =
   Html.div
     []
-    [ Html.text <| "height = " ++ toString model.height ++ " width = " ++ toString model.width
+    [ Html.text <| "size = " ++ toString model.size
     , Html.ul
         []
         (List.map (\item -> Html.li [] [ (Html.text << toString) item ]) model.pieces)
