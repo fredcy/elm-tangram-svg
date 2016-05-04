@@ -69,7 +69,7 @@ updatePieces name msg items =
       else
         ( item :: items, cmds )
   in
-    List.foldl updatePiece ( [], [] ) items
+    List.foldr updatePiece ( [], [] ) items
 
 
 subscriptions : Model -> Sub Msg

@@ -13,14 +13,27 @@ view model =
     realPosition =
       getPosition model
   in
-    Svg.circle
-      [ cx (ts realPosition.x)
-      , cy (ts realPosition.y)
-      , r "40"
-      , fill "red"
+    Svg.node
+      "svg"
+      [ x (ts realPosition.x)
+      , y (ts realPosition.y)
       , onMouseDown DragStart
       ]
-      []
+      [ Svg.circle
+          [ cx "40"
+          , cy "40"
+          , r "40"
+          , fill "red"
+          ]
+          []
+      , Svg.circle
+          [ cx "40"
+          , cy "40"
+          , r "30"
+          , fill "black"
+          ]
+          []
+      ]
 
 
 ts : Int -> String
