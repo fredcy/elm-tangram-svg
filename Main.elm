@@ -34,8 +34,8 @@ init : ( Model, Cmd a )
 init =
   let
     pieces =
-      [ ( "one", (Piece.init (Piece.Position 100 100)) )
-      , ( "two", (Piece.init (Piece.Position 200 200)) )
+      [ ( "one", (Piece.init (Piece.Triangle "red" 30.0) (Piece.Position 100 100) 0) )
+      , ( "two", (Piece.init (Piece.Triangle "orange" 30.0) (Piece.Position 200 200) 45) )
       ]
   in
     ( { pieces = pieces }, Cmd.none )

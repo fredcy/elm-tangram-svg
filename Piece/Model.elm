@@ -6,14 +6,16 @@ import Svg exposing (Svg)
 
 
 type alias Model =
-  { position : Position
+  { shape : Shape
+  , position : Position
+  , rotation : Rotation
   , drag : Maybe Drag
   }
 
 
-init : Position -> Model
-init position =
-  Model position Nothing
+init : Shape -> Position -> Rotation -> Model
+init shape position rotation =
+  Model shape position rotation Nothing
 
 
 getPosition : Model -> Position

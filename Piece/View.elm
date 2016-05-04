@@ -1,10 +1,10 @@
-module Piece.View exposing (..)
+module Piece.View exposing (view)
 
-import Piece.Model exposing (..)
-import Piece.Types exposing (..)
-import Svg exposing (..)
+import Piece.Model exposing (Model, getPosition)
+import Piece.Types exposing (Msg(DragStart), Shape(..))
+import Svg exposing (Svg, circle)
 import Svg.Attributes exposing (..)
-import Svg.Events exposing (..)
+import Svg.Events exposing (onMouseDown)
 
 
 view : Model -> Svg Msg
@@ -15,27 +15,23 @@ view model =
   in
     Svg.node
       "svg"
-      [ x (ts realPosition.x)
-      , y (ts realPosition.y)
+      [ x (toString realPosition.x)
+      , y (toString realPosition.y)
       , onMouseDown DragStart
       ]
-      [ Svg.circle
-          [ cx "40"
-          , cy "40"
-          , r "40"
-          , fill "red"
-          ]
-          []
-      , Svg.circle
-          [ cx "40"
-          , cy "40"
-          , r "30"
-          , fill "black"
-          ]
-          []
+      [ case model.shape of
+          Triangle color scale ->
+            triangle color scale model.rotation
       ]
 
 
-ts : Int -> String
-ts i =
-  toString i
+triangle : String -> Float -> Float -> Svg Msg
+triangle color scale rotation =
+  Svg.polygon
+    [ points "0, 0 1,0 0,1"
+    , transform ("scale(" ++ toString scale ++ ") rotate(" ++ toString rotation ++ " 0.5 0.5)")
+    , fill color
+    , stroke "gray"
+    , strokeWidth (toString (4.0 / scale))
+    ]
+    []

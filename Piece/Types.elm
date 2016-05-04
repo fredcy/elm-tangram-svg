@@ -20,3 +20,17 @@ type Msg
   | MouseDown Position
 
 
+type alias Color =
+  String
+
+
+type alias Scale =
+  Float
+
+
+type alias Rotation =
+  Float
+
+
+type Shape
+  = Triangle Color Scale
