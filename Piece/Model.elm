@@ -15,7 +15,7 @@ type alias Model =
 
 init : Shape -> Position -> Rotation -> Model
 init shape position rotation =
-  Model shape position rotation Nothing
+  Model shape position (degrees rotation) Nothing
 
 
 getPosition : Model -> Position
@@ -45,18 +45,13 @@ getRotation { position, rotation, drag } =
     Just (Rotating { start, sample, current }) ->
       case sample of
         Just samplexy ->
-          rotation - toDegrees (relativeRotation start samplexy current)
+          rotation - relativeRotation start samplexy current
 
         Nothing ->
           rotation
 
     _ ->
       rotation
-
-
-toDegrees : Float -> Float
-toDegrees radians =
-  radians / (2 * pi) * 360
 
 
 relativeRotation : Position -> Position -> Position -> Float

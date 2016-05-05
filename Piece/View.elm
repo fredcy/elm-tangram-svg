@@ -51,7 +51,7 @@ polygon : List ( Float, Float ) -> Colors.Color -> Float -> Float -> ( Float, Fl
 polygon shape color scale rotation position =
   let
     vertices =
-      shape |> List.map (scalePoint scale >> rotatePoint (degrees rotation) >> translatePoint position)
+      shape |> List.map (scalePoint scale >> rotatePoint rotation >> translatePoint position)
   in
     Svg.polygon
       [ points <| pointsToString vertices
