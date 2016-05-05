@@ -4,7 +4,7 @@ import Colors
 import Json.Decode as Json
 import Mouse
 import Piece.Model exposing (Model, getPosition, getRotation)
-import Piece.Types exposing (Msg(DragStart), Shape(..))
+import Piece.Types exposing (Msg(DragStart), Shape(..), Drag(..))
 import String
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
@@ -19,6 +19,9 @@ view model =
 
     realRotation =
       getRotation model
+
+    ds =
+      model.drag
   in
     Svg.node
       "svg"
@@ -26,13 +29,13 @@ view model =
       ]
       [ case model.shape of
           Triangle color scale ->
-            polygon trianglePoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y )
+            polygon trianglePoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y ) ds
 
           Square color scale ->
-            polygon squarePoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y )
+            polygon squarePoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y ) ds
 
           Parallelogram color scale ->
-            polygon paraPoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y )
+            polygon paraPoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y ) ds
       ]
 
 
@@ -60,11 +63,22 @@ paraPoints =
 -}
 
 
-polygon : List ( Float, Float ) -> Colors.Color -> Float -> Float -> ( Float, Float ) -> Svg Msg
-polygon shape color scale rotation position =
+polygon : List ( Float, Float ) -> Colors.Color -> Float -> Float -> ( Float, Float ) -> Maybe Drag -> Svg Msg
+polygon shape color scale rotation position drag =
   let
     vertices =
       shape |> List.map (scalePoint scale >> rotatePoint rotation >> translatePoint position)
+
+    cursorVal =
+      case drag of
+        Just (Dragging _) ->
+          "move"
+
+        Just (Rotating _) ->
+          "crosshair"
+
+        _ ->
+          "pointer"
   in
     Svg.polygon
       [ points <| pointsToString vertices
@@ -72,6 +86,7 @@ polygon shape color scale rotation position =
       , stroke "gray"
       , strokeWidth (toString (8))
       , strokeLinejoin "round"
+      , cursor cursorVal
       ]
       []
 

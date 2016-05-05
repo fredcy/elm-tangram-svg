@@ -2,8 +2,8 @@ module View exposing (..)
 
 import Html exposing (Html)
 import Html.App as Html
-import Svg exposing (..)
-import Svg.Attributes as Svg exposing (..)
+import Svg exposing (Svg)
+import Svg.Attributes exposing (..)
 import Model exposing (Model)
 import Piece.Model as Piece
 import Piece.View as Piece
@@ -27,7 +27,7 @@ scene model =
     [ width <| toString model.size.width
     , height <| toString model.size.height
     ]
-    (background model.size.width model.size.height :: (List.map pieceView model.pieces))
+    (background (cursorVal model) model.size.width model.size.height :: (List.map pieceView model.pieces))
 
 
 pieceView : ( Name, Piece.Model ) -> Svg.Svg Msg
@@ -35,14 +35,22 @@ pieceView ( name, piece ) =
   Piece.view piece |> Html.map (PieceMsg name)
 
 
-background : Int -> Int -> Svg.Svg Msg
-background width height =
+background : String -> Int -> Int -> Svg.Svg Msg
+background cursorV w h =
   Svg.rect
-    [ Svg.width <| toString width
-    , Svg.height <| toString height
+    [ width <| toString w
+    , height <| toString h
     , fill "#EEEEEE"
+    , cursor <| cursorV
     ]
     []
+
+
+cursorVal model =
+  if List.any (Piece.rotating << snd) model.pieces then
+    "crosshair"
+  else
+    "default"
 
 
 debugInfo : Model -> Html.Html Msg

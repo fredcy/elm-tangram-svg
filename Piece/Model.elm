@@ -1,4 +1,4 @@
-module Piece.Model exposing (..)
+module Piece.Model exposing (Model, init, getPosition, getRotation, rotating, subscriptions)
 
 import Mouse
 import Piece.Types exposing (..)
@@ -28,6 +28,16 @@ getPosition { position, drag } =
 
     _ ->
       position
+
+
+rotating : Model -> Bool
+rotating model =
+  case model.drag of
+    Just (Rotating _) ->
+      True
+
+    _ ->
+      False
 
 
 {-| Calculate current rotation while in rotating state by sampling a point after
