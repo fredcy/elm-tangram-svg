@@ -30,18 +30,57 @@ getPosition { position, drag } =
       position
 
 
+{-| Calculate current rotation while in rotating state by sampling a point after
+the user has dragged out a bit, creating a basis vector relative to the start
+point of the drag, then calculating the vactor of the current mouse location
+ralative to the drag-start. The rotation is adjusted by the difference of those
+vectors, effectively giving a "handle" deterined by the sample vector. Note that
+the handle rotation is about the drag-start point, not the rotational center of
+the object (not sure how to reconcile mouse coords with the SVG space
+coords).
+-}
 getRotation : Model -> Rotation
-getRotation { rotation, drag } =
+getRotation { position, rotation, drag } =
   case drag of
-    Just (Rotating { start, current }) ->
-      let
-        angleR = atan2 (toFloat (current.y - start.y)) (toFloat (current.x - start.x))
-        angleD = (angleR / (2 * pi)) * 360
-      in
-        rotation + angleD
+    Just (Rotating { start, sample, current }) ->
+      case sample of
+        Just samplexy ->
+          rotation - toDegrees (relativeRotation start samplexy current)
+
+        Nothing ->
+          rotation
 
     _ ->
       rotation
+
+
+toDegrees : Float -> Float
+toDegrees radians =
+  radians / (2 * pi) * 360
+
+
+relativeRotation : Position -> Position -> Position -> Float
+relativeRotation start sample current =
+  let
+    sampleAngle =
+      vectorAngle (vectorDiff sample start)
+
+    currentAngle =
+      vectorAngle (vectorDiff current start)
+  in
+    currentAngle - sampleAngle
+
+
+{-| Angle of point interpreted as vector, in radians
+-}
+vectorAngle : Position -> Float
+vectorAngle v =
+  atan2 (toFloat v.x) (toFloat v.y)
+
+
+vectorDiff : Position -> Position -> Position
+vectorDiff v1 v2 =
+  { x = v2.x - v1.x, y = v2.y - v1.y }
 
 
 subscriptions : Model -> Sub Msg

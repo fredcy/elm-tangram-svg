@@ -18,7 +18,7 @@ updateHelp context msg model =
   case msg of
     DragStart xy ->
       if context.shift then
-        { model | drag = Just (Rotating { start = xy, current = xy }) }
+        { model | drag = Just (Rotating { start = xy, current = xy, sample = Nothing }) }
       else
         { model | drag = Just (Dragging { start = xy, current = xy }) }
 
@@ -32,8 +32,15 @@ updateHelp context msg model =
             Just (Dragging { start }) ->
               Just (Dragging { start = start, current = xy })
 
-            Just (Rotating { start }) ->
-              Just (Rotating { start = start, current = xy })
+            Just (Rotating state) ->
+              let
+                sample =
+                  if state.sample == Nothing && distance state.start xy > 20 then
+                    Just xy
+                  else
+                    state.sample
+              in
+                Just (Rotating { state | current = xy, sample = sample })
       in
         { model | drag = drag }
 
@@ -43,3 +50,8 @@ updateHelp context msg model =
         , rotation = getRotation model
         , drag = Nothing
       }
+
+
+distance p1 p2 =
+  sqrt (toFloat (p1.x - p2.x) ^ 2 + toFloat (p1.y - p2.y) ^ 2)
+       

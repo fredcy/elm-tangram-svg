@@ -15,6 +15,7 @@ type Drag
   | Rotating
       { start : Position
       , current : Position
+      , sample : Maybe Position
       }
 
 
