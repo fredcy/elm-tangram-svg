@@ -16,6 +16,7 @@ view model =
   let
     realPosition =
       getPosition model
+
     realRotation =
       getRotation model
   in
@@ -29,12 +30,16 @@ view model =
 
           Square color scale ->
             polygon squarePoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y )
-          
+
           Parallelogram color scale ->
             polygon paraPoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y )
       ]
 
 
+{-| Define the vertices of the shapes.  Define each such that origin at their
+50% point so that rotation is natural. Triangle is defined with the hypotenuse
+is horizontal.
+-}
 trianglePoints =
   [ ( 0, -0.5 ), ( 1, 0.5 ), ( -1, 0.5 ) ]
 
@@ -45,6 +50,14 @@ squarePoints =
 
 paraPoints =
   [ ( 0.25, -0.25 ), ( -0.75, -0.25 ), ( -0.25, 0.25 ), ( 0.75, 0.25 ) ]
+
+
+
+{- Do transformations explicitly in Elm rather than using the SVG `transform`
+   attribute. My scheme of defining the shapes with origin at their center does
+   not seem to place nice with SVG transformation, causing clipping when coords
+   are negative.
+-}
 
 
 polygon : List ( Float, Float ) -> Colors.Color -> Float -> Float -> ( Float, Float ) -> Svg Msg
@@ -85,6 +98,8 @@ translatePoint ( dx, dy ) ( x, y ) =
   ( x + dx, y + dy )
 
 
+{-| Construct the value needed for the SVG `points` attribute.
+-}
 pointsToString : List ( Float, Float ) -> String
 pointsToString list =
   List.map (\( x, y ) -> toString x ++ " " ++ toString y) list |> String.join " "
