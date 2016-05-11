@@ -1,7 +1,7 @@
 module Piece.Types exposing (..)
 
 import Colors exposing (Color)
-
+import Window
 
 type alias Position =
   { x : Int, y : Int }
@@ -40,4 +40,6 @@ type Shape
 
 
 type alias Context =
-  { shift : Bool }
+  { shift : Bool
+  , size : Window.Size
+  }

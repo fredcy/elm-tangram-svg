@@ -46,12 +46,19 @@ updateHelp context msg model =
 
     DragEnd xy ->
       { model
-        | position = getPosition model
+        | position = getPosition model |> restrictTo context.size
         , rotation = getRotation model
         , drag = Nothing
       }
 
 
+distance : Position -> Position -> Float
 distance p1 p2 =
   sqrt (toFloat (p1.x - p2.x) ^ 2 + toFloat (p1.y - p2.y) ^ 2)
        
+
+restrictTo : { width : Int, height: Int } -> Position -> Position
+restrictTo { width, height } { x, y } =
+  { x = clamp 0 width x
+  , y = clamp 0 height y
+  }

@@ -15,7 +15,7 @@ update msg model =
     PieceMsg name pieceMsg ->
       let
         context =
-          { shift = model.shift }
+          { shift = model.shift, size = model.size }
 
         ( pieces', cmds ) =
           updatePieces name pieceMsg context model.pieces

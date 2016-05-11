@@ -14,7 +14,7 @@ view : Model -> Html.Html Msg
 view model =
   Html.div
     []
-    [ Html.h1 [] [ Html.text "SVG drag and drop" ]
+    [ Html.h1 [] [ Html.text "Elm drag&drop with SVG" ]
     , Html.div [] [ Html.text "Drag to move, shift-drag to rotate" ]
     , scene model
       --, debugInfo model
@@ -27,7 +27,8 @@ scene model =
     [ width <| toString model.size.width
     , height <| toString model.size.height
     ]
-    (background (cursorVal model) model.size.width model.size.height :: (List.map pieceView model.pieces))
+    (background (cursorVal model) model.size.width model.size.height
+    :: (List.map pieceView model.pieces))
 
 
 pieceView : ( Name, Piece.Model ) -> Svg.Svg Msg
@@ -40,7 +41,7 @@ background cursorV w h =
   Svg.rect
     [ width <| toString w
     , height <| toString h
-    , fill "#EEEEEE"
+    , fill "#F0F0F0"
     , cursor <| cursorV
     ]
     []

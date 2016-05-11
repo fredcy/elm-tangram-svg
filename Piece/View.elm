@@ -83,8 +83,8 @@ polygon shape color scale rotation position drag =
     Svg.polygon
       [ points <| pointsToString vertices
       , fill <| Colors.toCss color
-      , stroke "gray"
-      , strokeWidth (toString (8))
+      , stroke "lightgray"
+      , strokeWidth (toString (6))
       , strokeLinejoin "round"
       , cursor cursorVal
       ]
