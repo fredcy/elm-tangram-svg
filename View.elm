@@ -4,6 +4,7 @@ import Html exposing (Html)
 import Html.App as Html
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
+import Svg.Lazy exposing (lazy, lazy3)
 import Model exposing (Model)
 import Piece.Model as Piece
 import Piece.View as Piece
@@ -27,8 +28,8 @@ scene model =
     [ width <| toString model.size.width
     , height <| toString model.size.height
     ]
-    (background (cursorVal model) model.size.width model.size.height
-    :: (List.map pieceView model.pieces))
+    (lazy3 background (cursorVal model) model.size.width model.size.height
+    :: (List.map (lazy pieceView) model.pieces))
 
 
 pieceView : ( Name, Piece.Model ) -> Svg.Svg Msg
