@@ -40,9 +40,9 @@ subscriptions model =
       Window.resizes WindowSize
 
     keyDowns =
-      Keyboard.keydowns KeyDown
+      Keyboard.downs KeyDown
 
     keyUps =
-      Keyboard.keyups KeyUp
+      Keyboard.ups KeyUp
   in
     keyUps :: keyDowns :: reSize :: List.map mapSubs model.pieces |> Sub.batch
