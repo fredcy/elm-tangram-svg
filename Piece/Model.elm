@@ -6,38 +6,37 @@ import Svg exposing (Svg)
 
 
 type alias Model =
-  { shape : Shape
-  , position : Position
-  , rotation : Rotation
-  , drag : Maybe Drag
-  }
+    { shape : Shape
+    , position : Position
+    , rotation : Rotation
+    , drag : Maybe Drag
+    }
 
 
 init : Shape -> Position -> Rotation -> Model
 init shape position rotation =
-  Model shape position (degrees rotation) Nothing
+    Model shape position (degrees rotation) Nothing
 
 
 getPosition : Model -> Position
 getPosition { position, drag } =
-  case drag of
-    Just (Dragging { start, current }) ->
-      Position
-        (position.x + current.x - start.x)
-        (position.y + current.y - start.y)
+    case drag of
+        Just (Dragging { start, current }) ->
+            Position (position.x + current.x - start.x)
+                (position.y + current.y - start.y)
 
-    _ ->
-      position
+        _ ->
+            position
 
 
 rotating : Model -> Bool
 rotating model =
-  case model.drag of
-    Just (Rotating _) ->
-      True
+    case model.drag of
+        Just (Rotating _) ->
+            True
 
-    _ ->
-      False
+        _ ->
+            False
 
 
 {-| Calculate current rotation while in rotating state by sampling a point after
@@ -51,48 +50,48 @@ coords).
 -}
 getRotation : Model -> Rotation
 getRotation { position, rotation, drag } =
-  case drag of
-    Just (Rotating { start, sample, current }) ->
-      case sample of
-        Just samplexy ->
-          rotation - relativeRotation start samplexy current
+    case drag of
+        Just (Rotating { start, sample, current }) ->
+            case sample of
+                Just samplexy ->
+                    rotation - relativeRotation start samplexy current
 
-        Nothing ->
-          rotation
+                Nothing ->
+                    rotation
 
-    _ ->
-      rotation
+        _ ->
+            rotation
 
 
 relativeRotation : Position -> Position -> Position -> Float
 relativeRotation start sample current =
-  let
-    sampleAngle =
-      vectorAngle (vectorDiff sample start)
+    let
+        sampleAngle =
+            vectorAngle (vectorDiff sample start)
 
-    currentAngle =
-      vectorAngle (vectorDiff current start)
-  in
-    currentAngle - sampleAngle
+        currentAngle =
+            vectorAngle (vectorDiff current start)
+    in
+        currentAngle - sampleAngle
 
 
 {-| Angle of point interpreted as vector, in radians
 -}
 vectorAngle : Position -> Float
 vectorAngle v =
-  atan2 (toFloat v.x) (toFloat v.y)
+    atan2 (toFloat v.x) (toFloat v.y)
 
 
 vectorDiff : Position -> Position -> Position
 vectorDiff v1 v2 =
-  { x = v2.x - v1.x, y = v2.y - v1.y }
+    { x = v2.x - v1.x, y = v2.y - v1.y }
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  case model.drag of
-    Nothing ->
-      Sub.none
+    case model.drag of
+        Nothing ->
+            Sub.none
 
-    Just _ ->
-      Sub.batch [ Mouse.moves DragAt, Mouse.ups DragEnd ]
+        Just _ ->
+            Sub.batch [ Mouse.moves DragAt, Mouse.ups DragEnd ]

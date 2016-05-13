@@ -6,12 +6,12 @@ import Piece.Types as Piece
 
 
 type alias Name =
-  String
+    String
 
 
 type Msg
-  = PieceMsg Name Piece.Msg
-  | WindowSize Window.Size
-  | KeyDown KeyCode
-  | KeyUp KeyCode
-  | Error
+    = PieceMsg Name Piece.Msg
+    | WindowSize Window.Size
+    | KeyDown KeyCode
+    | KeyUp KeyCode
+    | Error
