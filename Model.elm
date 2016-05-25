@@ -2,6 +2,7 @@ module Model exposing (..)
 
 import Task
 import Window
+import Mouse
 
 
 --
@@ -16,6 +17,7 @@ type alias Model =
     { pieces : List ( Name, Piece.Model )
     , size : Window.Size
     , shift : Bool
+    , mouse : Mouse.Position
     }
 
 
@@ -35,6 +37,7 @@ init =
         ( { pieces = pieces
           , size = Window.Size 600 600
           , shift = False
+          , mouse = Mouse.Position 0 0
           }
         , Task.perform (always Error) WindowSize Window.size
         )

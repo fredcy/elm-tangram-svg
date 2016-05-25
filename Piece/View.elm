@@ -1,10 +1,14 @@
 module Piece.View exposing (view)
 
 import Colors
-import Json.Decode as Json
-import Mouse
 import Piece.Model exposing (Model, getPosition, getRotation)
-import Piece.Types exposing (Msg(DragStart), Shape(..), Drag(..))
+import Piece.Types exposing (Msg(DragStart), Shape(..), Drag(..), Position)
+
+
+--
+
+import Json.Decode as Json exposing ((:=))
+import Mouse
 import String
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
@@ -24,7 +28,7 @@ view model =
             model.drag
     in
         Svg.node "svg"
-            [ VirtualDom.on "mousedown" (Json.map DragStart Mouse.position)
+            [ VirtualDom.on "mousedown" (Json.map DragStart offsetPosition)
             ]
             [ case model.shape of
                 Triangle color scale ->
@@ -36,6 +40,14 @@ view model =
                 Parallelogram color scale ->
                     polygon paraPoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y ) ds
             ]
+
+
+{-| Extract the *offset* position from the mouse event, giving coords relative
+to the SVG space of the node rather than global window coords.
+-}
+offsetPosition : Json.Decoder Position
+offsetPosition =
+    Json.object2 Position ("offsetX" := Json.int) ("offsetY" := Json.int)
 
 
 {-| Define the vertices of the shapes.  Define each such that origin at their

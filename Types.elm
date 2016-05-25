@@ -2,6 +2,7 @@ module Types exposing (..)
 
 import Char exposing (KeyCode)
 import Window
+import Mouse
 import Piece.Types as Piece
 
 
@@ -14,4 +15,5 @@ type Msg
     | WindowSize Window.Size
     | KeyDown KeyCode
     | KeyUp KeyCode
+    | MousePosition Mouse.Position
     | Error

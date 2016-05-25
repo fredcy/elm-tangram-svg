@@ -10,11 +10,11 @@ import Piece.Types as Piece
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
+    case msg |> Debug.log "msg" of
         PieceMsg name pieceMsg ->
             let
                 context =
-                    { shift = model.shift, size = model.size }
+                    { shift = model.shift, size = model.size, mouse = model.mouse }
 
                 ( pieces', cmds ) =
                     updatePieces name pieceMsg context model.pieces
@@ -46,6 +46,9 @@ update msg model =
                 ( { model | shift = False }, Cmd.none )
             else
                 ( model, Cmd.none )
+
+        MousePosition position ->
+            { model | mouse = position } ! []
 
 
 {-| Fold over the list of components and apply the msg to the component piece

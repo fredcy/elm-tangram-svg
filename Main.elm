@@ -4,6 +4,7 @@ import Html
 import Html.App as Html
 import Window
 import Keyboard
+import Mouse
 import Piece.Model as Piece
 import Piece.Update as Piece
 import Piece.View as Piece
@@ -40,5 +41,8 @@ subscriptions model =
 
         keyUps =
             Keyboard.ups KeyUp
+
+        mousePos =
+            Mouse.moves MousePosition
     in
-        keyUps :: keyDowns :: reSize :: List.map mapSubs model.pieces |> Sub.batch
+        [ mousePos, keyUps, keyDowns, reSize ] ++ List.map mapSubs model.pieces |> Sub.batch

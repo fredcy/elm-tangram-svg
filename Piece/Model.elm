@@ -10,12 +10,13 @@ type alias Model =
     , position : Position
     , rotation : Rotation
     , drag : Maybe Drag
+    , origin : Position
     }
 
 
 init : Shape -> Position -> Rotation -> Model
 init shape position rotation =
-    Model shape position (degrees rotation) Nothing
+    Model shape position (degrees rotation) Nothing (Position 0 0)
 
 
 getPosition : Model -> Position
@@ -54,7 +55,7 @@ getRotation { position, rotation, drag } =
         Just (Rotating { start, sample, current }) ->
             case sample of
                 Just samplexy ->
-                    rotation - relativeRotation start samplexy current
+                    rotation - relativeRotation position samplexy current
 
                 Nothing ->
                     rotation
