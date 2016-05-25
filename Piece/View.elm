@@ -75,6 +75,8 @@ paraPoints =
 -}
 
 
+{-| Construct part of 'd' attribute for Svg path element
+-}
 ds : String -> List number -> String
 ds tag values =
     tag ++ " " ++ (String.join " " (List.map toString values)) ++ " "
@@ -91,21 +93,40 @@ rotateHandle center end =
             , style "stroke:rgb(255,0,0);stroke-width:2"
             ]
             []
-        , Svg.path
-            [ d <| (ds "M" [ end.x, end.y ] ++ ds "L" [ end.x, end.y + 20 ])
-            , style "stroke:rgb(255,0,0);stroke-width:2"
-            ]
-            []
+        , handleArc center end
         ]
 
 
+
+-- TODO: Having positions as both ( Float, Float ) and { x : Int, y : Int } is
+-- causing grief. Can I reconcile those somehow?
+
+
+{-| Draw arc at end of rotation handle. What a pain.
+-}
 handleArc : Position -> Position -> Svg Msg
 handleArc center end =
     let
         radius =
             distance center end
+
+        centerPt =
+            toPoint center
+
+        arcend =
+            end |> toPoint |> translatePoint (scalePoint -1 centerPt) |> rotatePoint (degrees 20) |> translatePoint centerPt |> toPosition
+
+        dVal =
+            ds "M" [ end.x, end.y ]
+                ++ ds "A" [ radius, radius, 0, 0, 1, toFloat arcend.x, toFloat arcend.y ]
+                |> Debug.log "dVal"
     in
-        Svg.path [] []
+        Svg.path
+            [ d dVal
+            , style "stroke:rgb(255,0,0);stroke-width:2"
+            ]
+            []
+
 
 polygon : List ( Float, Float ) -> Colors.Color -> Float -> Float -> ( Float, Float ) -> Maybe Drag -> Svg Msg
 polygon shape color scale rotation (( px, py ) as position) drag =
@@ -173,3 +194,13 @@ translatePoint ( dx, dy ) ( x, y ) =
 pointsToString : List ( Float, Float ) -> String
 pointsToString list =
     List.map (\( x, y ) -> toString x ++ " " ++ toString y) list |> String.join " "
+
+
+toPoint : Position -> ( Float, Float )
+toPoint position =
+    ( toFloat position.x, toFloat position.y )
+
+
+toPosition : ( Float, Float ) -> Position
+toPosition ( px, py ) =
+    Position (round px) (round py)
