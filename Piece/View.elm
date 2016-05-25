@@ -113,17 +113,23 @@ handleArc center end =
         centerPt =
             toPoint center
 
+        arcAngle =
+            degrees 20
+
+        arcbegin =
+            end |> toPoint |> translatePoint (scalePoint -1 centerPt) |> rotatePoint (-arcAngle / 2) |> translatePoint centerPt
+
         arcend =
-            end |> toPoint |> translatePoint (scalePoint -1 centerPt) |> rotatePoint (degrees 20) |> translatePoint centerPt |> toPosition
+            end |> toPoint |> translatePoint (scalePoint -1 centerPt) |> rotatePoint (arcAngle / 2) |> translatePoint centerPt |> toPosition
 
         dVal =
-            ds "M" [ end.x, end.y ]
+            ds "M" [ fst arcbegin, snd arcbegin ]
                 ++ ds "A" [ radius, radius, 0, 0, 1, toFloat arcend.x, toFloat arcend.y ]
                 |> Debug.log "dVal"
     in
         Svg.path
             [ d dVal
-            , style "stroke:rgb(255,0,0);stroke-width:2"
+            , style "stroke:rgb(255,0,0);stroke-width:2;fill:none"
             ]
             []
 
