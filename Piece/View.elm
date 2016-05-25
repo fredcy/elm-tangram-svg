@@ -2,7 +2,7 @@ module Piece.View exposing (view)
 
 import Colors
 import Piece.Model exposing (Model, getPosition, getRotation)
-import Piece.Types exposing (Msg(DragStart), Shape(..), Drag(..), Position)
+import Piece.Types exposing (..)
 
 
 --
@@ -44,12 +44,11 @@ view model =
 
 {-| Extract the page and offset positions from the mouse event.
 -}
-offsetPosition : Json.Decoder (Position, Position)
+offsetPosition : Json.Decoder ( Position, Position )
 offsetPosition =
     Json.object2 (,)
         (Json.object2 Position ("pageX" := Json.int) ("pageY" := Json.int))
         (Json.object2 Position ("offsetX" := Json.int) ("offsetY" := Json.int))
-                    
 
 
 {-| Define the vertices of the shapes.  Define each such that origin at their
@@ -76,8 +75,40 @@ paraPoints =
 -}
 
 
+ds : String -> List number -> String
+ds tag values =
+    tag ++ " " ++ (String.join " " (List.map toString values)) ++ " "
+
+
+rotateHandle : Position -> Position -> Svg Msg
+rotateHandle center end =
+    Svg.svg []
+        [ Svg.line
+            [ x1 <| toString center.x
+            , y1 <| toString center.y
+            , x2 <| toString end.x
+            , y2 <| toString end.y
+            , style "stroke:rgb(255,0,0);stroke-width:2"
+            ]
+            []
+        , Svg.path
+            [ d <| (ds "M" [ end.x, end.y ] ++ ds "L" [ end.x, end.y + 20 ])
+            , style "stroke:rgb(255,0,0);stroke-width:2"
+            ]
+            []
+        ]
+
+
+handleArc : Position -> Position -> Svg Msg
+handleArc center end =
+    let
+        radius =
+            distance center end
+    in
+        Svg.path [] []
+
 polygon : List ( Float, Float ) -> Colors.Color -> Float -> Float -> ( Float, Float ) -> Maybe Drag -> Svg Msg
-polygon shape color scale rotation position drag =
+polygon shape color scale rotation (( px, py ) as position) drag =
     let
         vertices =
             shape |> List.map (scalePoint scale >> rotatePoint rotation >> translatePoint position)
@@ -96,14 +127,7 @@ polygon shape color scale rotation position drag =
         handle =
             case drag of
                 Just (Rotating { current }) ->
-                    Svg.line
-                        [ x1 <| toString (fst position)
-                        , y1 <| toString (snd position)
-                        , x2 <| toString current.x
-                        , y2 <| toString current.y
-                        , style "stroke:rgb(255,0,0);stroke-width:2"
-                        ]
-                        []
+                    rotateHandle (Position (round px) (round py)) current
 
                 _ ->
                     Svg.text ""

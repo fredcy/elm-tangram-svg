@@ -44,3 +44,8 @@ type alias Context =
     { shift : Bool
     , size : Window.Size
     }
+
+
+distance : Position -> Position -> Float
+distance p1 p2 =
+    sqrt (toFloat (p1.x - p2.x) ^ 2 + toFloat (p1.y - p2.y) ^ 2)
