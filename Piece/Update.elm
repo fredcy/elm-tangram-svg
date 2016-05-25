@@ -21,13 +21,12 @@ positionDiff origin pos =
 updateHelp : Context -> Msg -> Model -> Model
 updateHelp context msg model =
     case msg of
-        DragStart xySvg ->
+        DragStart (xyMouse, xySvg) ->
             let
                 -- Determine SVG origin of piece relative to window by comparing
-                -- mouse position at time of mousedown to the offset position
-                -- from that event. Awful kludge.
+                -- mouse position at time of mousedown to the offset position.
                 svgOrigin =
-                    positionDiff xySvg context.mouse |> Debug.log "svgOrigin"
+                    positionDiff xySvg xyMouse |> Debug.log "svgOrigin"
             in
                 if context.shift then
                     { model

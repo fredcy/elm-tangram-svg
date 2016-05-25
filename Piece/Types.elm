@@ -2,7 +2,6 @@ module Piece.Types exposing (..)
 
 import Colors exposing (Color)
 import Window
-import Mouse
 
 
 type alias Position =
@@ -22,7 +21,7 @@ type Drag
 
 
 type Msg
-    = DragStart Position
+    = DragStart ( Position, Position )
     | DragAt Position
     | DragEnd Position
 
@@ -44,5 +43,4 @@ type Shape
 type alias Context =
     { shift : Bool
     , size : Window.Size
-    , mouse : Mouse.Position
     }

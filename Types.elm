@@ -15,5 +15,4 @@ type Msg
     | WindowSize Window.Size
     | KeyDown KeyCode
     | KeyUp KeyCode
-    | MousePosition Mouse.Position
     | Error

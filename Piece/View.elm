@@ -27,7 +27,7 @@ view model =
         ds =
             model.drag
     in
-        Svg.node "svg"
+        Svg.svg
             [ VirtualDom.on "mousedown" (Json.map DragStart offsetPosition)
             ]
             [ case model.shape of
@@ -42,12 +42,14 @@ view model =
             ]
 
 
-{-| Extract the *offset* position from the mouse event, giving coords relative
-to the SVG space of the node rather than global window coords.
+{-| Extract the page and offset positions from the mouse event.
 -}
-offsetPosition : Json.Decoder Position
+offsetPosition : Json.Decoder (Position, Position)
 offsetPosition =
-    Json.object2 Position ("offsetX" := Json.int) ("offsetY" := Json.int)
+    Json.object2 (,)
+        (Json.object2 Position ("pageX" := Json.int) ("pageY" := Json.int))
+        (Json.object2 Position ("offsetX" := Json.int) ("offsetY" := Json.int))
+                    
 
 
 {-| Define the vertices of the shapes.  Define each such that origin at their
@@ -90,16 +92,34 @@ polygon shape color scale rotation position drag =
 
                 _ ->
                     "pointer"
+
+        handle =
+            case drag of
+                Just (Rotating { current }) ->
+                    Svg.line
+                        [ x1 <| toString (fst position)
+                        , y1 <| toString (snd position)
+                        , x2 <| toString current.x
+                        , y2 <| toString current.y
+                        , style "stroke:rgb(255,0,0);stroke-width:2"
+                        ]
+                        []
+
+                _ ->
+                    Svg.text ""
     in
-        Svg.polygon
-            [ points <| pointsToString vertices
-            , fill <| Colors.toCss color
-            , stroke "lightgray"
-            , strokeWidth (toString (6))
-            , strokeLinejoin "round"
-            , cursor cursorVal
+        Svg.svg []
+            [ Svg.polygon
+                [ points <| pointsToString vertices
+                , fill <| Colors.toCss color
+                , stroke "lightgray"
+                , strokeWidth (toString (6))
+                , strokeLinejoin "round"
+                , cursor cursorVal
+                ]
+                []
+            , handle
             ]
-            []
 
 
 rotatePoint : Float -> ( Float, Float ) -> ( Float, Float )
