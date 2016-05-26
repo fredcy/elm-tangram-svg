@@ -56,7 +56,7 @@ updateHelp context msg model =
                         Just (Rotating state) ->
                             let
                                 sample =
-                                    if state.sample == Nothing && distance state.start xySvg > 20 then
+                                    if state.sample == Nothing && distance state.start xySvg > 2 then
                                         Just xySvg
                                     else
                                         state.sample
