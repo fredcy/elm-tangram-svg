@@ -2,6 +2,7 @@ module Update exposing (update)
 
 import Window
 import Json.Encode as JE
+import Json.Decode as JD
 import Model exposing (..)
 import Types exposing (..)
 import Task
@@ -21,15 +22,8 @@ update msg model =
 
                 ( pieces', cmds ) =
                     updatePieces name pieceMsg context model.pieces
-
-                save =
-                    layoutEncoder pieces'
-                        |> JE.encode 0
-                        |> Debug.log "layout"
-                        |> LocalStorage.set "tangram"
-                        |> Task.perform (always Error) (always NoOp)
             in
-                ( { model | pieces = pieces' }, Cmd.batch (save :: cmds) )
+                ( { model | pieces = pieces' }, Cmd.batch (saveCmd pieces' :: cmds) )
 
         WindowSize wsize ->
             let
@@ -58,7 +52,19 @@ update msg model =
                 ( model, Cmd.none )
 
         Reset ->
-            { model | pieces = tangramPieces } ! []
+            { model | pieces = tangramPieces } ! [ saveCmd tangramPieces ]
+
+        GetLayout stringMaybe ->
+            case stringMaybe of
+                Just json ->
+                    let
+                        locations =
+                            JD.decodeString locationsDecoder json
+                    in
+                        updateLocations locations model ! []
+
+                _ ->
+                    model ! []
 
         NoOp ->
             model ! []
@@ -94,6 +100,49 @@ layoutEncoder : List ( Name, Piece.Model ) -> JE.Value
 layoutEncoder pieces =
     let
         help ( name, piece ) =
-            JE.list [ JE.string name, Piece.encoder piece ]
+            JE.list [ JE.string name, Piece.locationEncoder piece ]
     in
         JE.list (List.map help pieces)
+
+
+updateLocations : Result String (List ( Name, Piece.Location )) -> Model -> Model
+updateLocations locationsResult model =
+    case locationsResult of
+        Ok locations ->
+            List.foldr updateLocation model locations
+
+        _ ->
+            model
+
+
+locationsDecoder : JD.Decoder (List ( Name, Piece.Location ))
+locationsDecoder =
+    JD.list <| JD.tuple2 (,) JD.string Piece.locationDecoder
+
+
+{-| Change the location of the named piece.
+-}
+updateLocation : ( Name, Piece.Location ) -> Model -> Model
+updateLocation ( name, location ) model =
+    let
+        updatePiece : ( Name, Piece.Model ) -> ( Name, Piece.Model )
+        updatePiece ( nameP, piece ) =
+            if name == nameP then
+                ( nameP, Piece.withLocation location piece )
+            else
+                ( nameP, piece )
+
+        pieces' =
+            List.map updatePiece model.pieces
+    in
+        { model | pieces = pieces' }
+
+
+{-| Command to save the entire layout: positions and rotations.
+-}
+saveCmd : List ( Name, Piece.Model ) -> Cmd Msg
+saveCmd pieces =
+    layoutEncoder pieces
+        |> JE.encode 0
+        |> LocalStorage.set "tangram"
+        |> Task.perform (always Error) (always NoOp)

@@ -3,6 +3,7 @@ module Model exposing (..)
 import Task
 import Window
 import Mouse
+import LocalStorage
 
 
 --
@@ -30,7 +31,10 @@ init =
           , size = Window.Size 600 600
           , shift = False
           }
-        , Task.perform (always Error) WindowSize Window.size
+        , Cmd.batch
+            [ Task.perform (always Error) WindowSize Window.size
+            , Task.perform (always Error) GetLayout (LocalStorage.get "tangram")
+            ]
         )
 
 

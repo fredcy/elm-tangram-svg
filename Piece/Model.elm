@@ -1,9 +1,22 @@
-module Piece.Model exposing (Model, init, getPosition, getRotation, rotating, subscriptions, encoder)
+module Piece.Model
+    exposing
+        ( Model
+        , Location
+        , init
+        , getPosition
+        , getRotation
+        , rotating
+        , subscriptions
+        , locationEncoder
+        , locationDecoder
+        , withLocation
+        )
 
 import Mouse
 import Piece.Types exposing (..)
 import Svg exposing (Svg)
 import Json.Encode as JE
+import Json.Decode as JD exposing ((:=))
 
 
 type alias Model =
@@ -15,8 +28,8 @@ type alias Model =
     }
 
 
-encoder : Model -> JE.Value
-encoder model =
+locationEncoder : Model -> JE.Value
+locationEncoder model =
     JE.object
         [ ( "position", positionEncoder model.position )
         , ( "rotation", JE.float model.rotation )
@@ -29,6 +42,31 @@ positionEncoder position =
         [ ( "x", JE.int position.x )
         , ( "y", JE.int position.y )
         ]
+
+
+type alias Location =
+    { position : Position
+    , rotation : Rotation
+    }
+
+
+locationDecoder : JD.Decoder Location
+locationDecoder =
+    JD.object2 Location
+        ("position" := positionDecoder)
+        ("rotation" := JD.float)
+
+
+positionDecoder : JD.Decoder Position
+positionDecoder =
+    JD.object2 Position
+        ("x" := JD.int)
+        ("y" := JD.int)
+
+
+withLocation : Location -> Model -> Model
+withLocation { position, rotation } piece =
+    { piece | position = position, rotation = rotation }
 
 
 init : Shape -> Position -> Rotation -> Model

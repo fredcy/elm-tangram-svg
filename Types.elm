@@ -15,6 +15,7 @@ type Msg
     | WindowSize Window.Size
     | KeyDown KeyCode
     | KeyUp KeyCode
+    | GetLayout (Maybe String)
     | Reset
     | Error
     | NoOp
