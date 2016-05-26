@@ -3,6 +3,7 @@ module Piece.Model exposing (Model, init, getPosition, getRotation, rotating, su
 import Mouse
 import Piece.Types exposing (..)
 import Svg exposing (Svg)
+import Json.Encode as JE
 
 
 type alias Model =
@@ -12,6 +13,28 @@ type alias Model =
     , drag : Maybe Drag
     , origin : Position
     }
+
+
+encode : Model -> JE.Value
+encode model =
+    JE.object
+        [ ( "position", encodePosition model.position )
+        , ( "rotation", JE.float model.rotation )
+        , ( "shape", encodeShape model.shape )
+        ]
+
+
+encodePosition : Position -> JE.Value
+encodePosition position =
+    JE.object
+        [ ( "x", JE.int position.x )
+        , ( "y", JE.int position.y )
+        ]
+
+
+encodeShape : Shape -> JE.Value
+encodeShape shape =
+    JE.string "TODO"
 
 
 init : Shape -> Position -> Rotation -> Model

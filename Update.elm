@@ -1,11 +1,14 @@
 module Update exposing (update)
 
 import Window
+import Json.Encode as JE
 import Model exposing (..)
 import Types exposing (..)
+import Task
 import Piece.Model as Piece
 import Piece.Update as Piece
 import Piece.Types as Piece
+import LocalStorage
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -18,8 +21,11 @@ update msg model =
 
                 ( pieces', cmds ) =
                     updatePieces name pieceMsg context model.pieces
+
+                save =
+                    piecesAsJson pieces' |> LocalStorage.set "tangram" |> Task.perform (always Error) (always NoOp)
             in
-                ( { model | pieces = pieces' }, Cmd.batch cmds )
+                ( { model | pieces = pieces' }, Cmd.batch (save :: cmds) )
 
         WindowSize wsize ->
             let
@@ -47,6 +53,12 @@ update msg model =
             else
                 ( model, Cmd.none )
 
+        Reset ->
+            { model | pieces = tangramPieces } ! []
+
+        NoOp ->
+            model ! []
+
 
 {-| Fold over the list of components and apply the msg to the component piece
 with the matching name, collecting the updated models and resulting commands
@@ -72,3 +84,9 @@ updatePieces name msg context items =
                 ( item :: items, cmds )
     in
         List.foldr updatePiece ( [], [] ) items
+
+
+piecesAsJson : List ( Name, Piece.Model ) -> String
+piecesAsJson pieces =
+    "TODO"
+

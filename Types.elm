@@ -15,4 +15,6 @@ type Msg
     | WindowSize Window.Size
     | KeyDown KeyCode
     | KeyUp KeyCode
+    | Reset
     | Error
+    | NoOp

@@ -2,6 +2,7 @@ module View exposing (..)
 
 import Html exposing (Html)
 import Html.App as Html
+import Html.Events
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 import Svg.Lazy exposing (lazy, lazy3)
@@ -17,6 +18,7 @@ view model =
         [ Html.h1 [] [ Html.text "Elm drag&drop with SVG" ]
         , Html.div [] [ Html.text "Drag to move, shift-drag to rotate" ]
         , scene model
+        , resetButton
           --, debugInfo model
         ]
 
@@ -63,3 +65,9 @@ debugInfo model =
         , Html.ul []
             (List.map (\item -> Html.li [] [ (Html.text << toString) item ]) model.pieces)
         ]
+
+
+resetButton : Html.Html Msg
+resetButton =
+    Html.button [ Html.Events.onClick Reset ]
+        [ Html.text "reset" ]
