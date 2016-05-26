@@ -8,7 +8,7 @@ This program requires the LocalStorage effects module which is not yet published
 ```shell
 cd workdir
 git clone https://github.com/fredcy/elm-tangram-svg.git
-git clone https://github.com/fredcy/storage.git
+git clone https://github.com/fredcy/localstorage.git
 git clone https://github.com/NoRedInk/elm-ops-tooling.git
 
 cd elm-tangram-svg
@@ -18,7 +18,7 @@ make
 
 # Install the module providing LocalStorage as if it were a package.
 # This modifies elm-package.json and elm-stuff.
-../elm-ops-tooling/elm_self_publish.py ../storage .
+../elm-ops-tooling/elm_self_publish.py ../localstorage .
 
 # Build again; this should now work.
 make
