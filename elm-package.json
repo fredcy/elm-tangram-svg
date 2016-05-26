@@ -1,13 +1,11 @@
 {
     "version": "1.0.0",
-    "summary": "helpful summary of your project, less than 80 characters",
-    "repository": "https://github.com/fredcy/storage.git",
+    "summary": "Elm tangram editor usin SVG",
+    "repository": "https://github.com/fredcy/elm-tangram-svg.git",
     "license": "BSD3",
     "source-directories": [
         "."
-        , "../storage/src"
     ],
-    "native-modules": true,
     "exposed-modules": [],
     "dependencies": {
         "elm-lang/core": "4.0.0 <= v < 5.0.0",
