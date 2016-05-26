@@ -1,4 +1,4 @@
-module Piece.Model exposing (Model, init, getPosition, getRotation, rotating, subscriptions)
+module Piece.Model exposing (Model, init, getPosition, getRotation, rotating, subscriptions, encoder)
 
 import Mouse
 import Piece.Types exposing (..)
@@ -15,26 +15,20 @@ type alias Model =
     }
 
 
-encode : Model -> JE.Value
-encode model =
+encoder : Model -> JE.Value
+encoder model =
     JE.object
-        [ ( "position", encodePosition model.position )
+        [ ( "position", positionEncoder model.position )
         , ( "rotation", JE.float model.rotation )
-        , ( "shape", encodeShape model.shape )
         ]
 
 
-encodePosition : Position -> JE.Value
-encodePosition position =
+positionEncoder : Position -> JE.Value
+positionEncoder position =
     JE.object
         [ ( "x", JE.int position.x )
         , ( "y", JE.int position.y )
         ]
-
-
-encodeShape : Shape -> JE.Value
-encodeShape shape =
-    JE.string "TODO"
 
 
 init : Shape -> Position -> Rotation -> Model

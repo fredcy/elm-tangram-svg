@@ -23,7 +23,11 @@ update msg model =
                     updatePieces name pieceMsg context model.pieces
 
                 save =
-                    piecesAsJson pieces' |> LocalStorage.set "tangram" |> Task.perform (always Error) (always NoOp)
+                    layoutEncoder pieces'
+                        |> JE.encode 0
+                        |> Debug.log "layout"
+                        |> LocalStorage.set "tangram"
+                        |> Task.perform (always Error) (always NoOp)
             in
                 ( { model | pieces = pieces' }, Cmd.batch (save :: cmds) )
 
@@ -86,7 +90,10 @@ updatePieces name msg context items =
         List.foldr updatePiece ( [], [] ) items
 
 
-piecesAsJson : List ( Name, Piece.Model ) -> String
-piecesAsJson pieces =
-    "TODO"
-
+layoutEncoder : List ( Name, Piece.Model ) -> JE.Value
+layoutEncoder pieces =
+    let
+        help ( name, piece ) =
+            JE.list [ JE.string name, Piece.encoder piece ]
+    in
+        JE.list (List.map help pieces)
