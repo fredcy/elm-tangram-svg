@@ -15,8 +15,8 @@ import Types exposing (..)
 view : Model -> Html.Html Msg
 view model =
     Html.div []
-        [ Html.h1 [] [ Html.text "Elm drag&drop with SVG" ]
-        , Html.div [] [ Html.text "Drag to move, shift-drag to rotate" ]
+        [ Html.h1 [] [ Html.text "Elm Tangram: drag&drop with SVG" ]
+        , Html.div [] [ Html.text "Drag to move, shift-drag to rotate. Saved to localStorage." ]
         , scene model
         , resetButton
           --, debugInfo model
@@ -28,6 +28,7 @@ scene model =
     Svg.svg
         [ width <| toString model.size.width
         , height <| toString model.size.height
+        , style "margin-left: 8px; margin-top: 10px"
         ]
         (lazy3 background (cursorVal model) model.size.width model.size.height
             :: (List.map (lazy pieceView) model.pieces)
