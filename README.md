@@ -1,4 +1,5 @@
-# elm-svg-example
+# Tangram editor in Elm
+
 Example Elm SVG application with drag-and-drop.
 
 # Installation
