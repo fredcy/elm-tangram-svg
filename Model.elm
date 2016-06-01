@@ -18,6 +18,8 @@ type alias Model =
     { pieces : List ( Name, Piece.Model )
     , size : Window.Size
     , shift : Bool
+    , showingLayout : Bool
+    , name : String
     }
 
 
@@ -30,6 +32,8 @@ init =
         ( { pieces = pieces
           , size = Window.Size 600 600
           , shift = False
+          , showingLayout = False
+          , name = "default"
           }
         , Cmd.batch
             [ Task.perform (always Error) WindowSize Window.size

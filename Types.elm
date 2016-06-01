@@ -16,6 +16,8 @@ type Msg
     | KeyDown KeyCode
     | KeyUp KeyCode
     | GetLayout (Maybe String)
+    | ToggleLayout
+    | SetName String
     | Reset
     | Error
     | NoOp

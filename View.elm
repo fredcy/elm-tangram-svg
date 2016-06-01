@@ -2,11 +2,14 @@ module View exposing (..)
 
 import Html exposing (Html)
 import Html.App as Html
+import Html.Attributes as HA
 import Html.Events
+import Json.Encode as JE
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 import Svg.Lazy exposing (lazy, lazy3)
 import Model exposing (Model)
+import Update exposing (layoutEncoder)
 import Piece.Model as Piece
 import Piece.View as Piece
 import Types exposing (..)
@@ -19,6 +22,12 @@ view model =
         , Html.div [] [ Html.text "Drag to move, shift-drag to rotate. Saved to localStorage." ]
         , scene model
         , resetButton
+        , showLayoutButton model
+        , nameView model
+        , if model.showingLayout then
+            exportView model
+          else
+            Html.text ""
           --, debugInfo model
         ]
 
@@ -72,3 +81,37 @@ resetButton : Html.Html Msg
 resetButton =
     Html.button [ Html.Events.onClick Reset ]
         [ Html.text "reset" ]
+
+
+showLayoutButton : Model -> Html Msg
+showLayoutButton model =
+    let
+        label =
+            if model.showingLayout then
+                "hide layout"
+            else
+                "show layout"
+    in
+        Html.button [ Html.Events.onClick ToggleLayout ]
+            [ Html.text label ]
+
+
+exportView : Model -> Html Msg
+exportView model =
+    Html.textarea
+        [ HA.class "exportView"
+        , HA.rows 4
+        ]
+        [ layoutEncoder model.pieces
+            |> JE.encode 2
+            |> Html.text
+        ]
+
+
+nameView : Model -> Html Msg
+nameView model =
+    Html.input
+        [ Html.Events.onInput SetName
+        , HA.value model.name
+        ]
+        []

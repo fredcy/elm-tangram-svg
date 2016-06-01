@@ -1,4 +1,4 @@
-module Update exposing (update)
+module Update exposing (update, layoutEncoder)
 
 import Window
 import Json.Encode as JE
@@ -23,7 +23,7 @@ update msg model =
                 ( pieces', cmds ) =
                     updatePieces name pieceMsg context model.pieces
             in
-                ( { model | pieces = pieces' }, Cmd.batch (saveCmd pieces' :: cmds) )
+                ( { model | pieces = pieces' }, Cmd.batch (saveCmd model.name pieces' :: cmds) )
 
         WindowSize wsize ->
             let
@@ -52,7 +52,7 @@ update msg model =
                 ( model, Cmd.none )
 
         Reset ->
-            { model | pieces = tangramPieces } ! [ saveCmd tangramPieces ]
+            { model | pieces = tangramPieces } ! [ saveCmd model.name tangramPieces ]
 
         GetLayout stringMaybe ->
             case stringMaybe of
@@ -65,6 +65,12 @@ update msg model =
 
                 _ ->
                     model ! []
+
+        ToggleLayout ->
+            { model | showingLayout = not model.showingLayout } ! []
+
+        SetName name ->
+            { model | name = name } ! []
 
         NoOp ->
             model ! []
@@ -140,9 +146,9 @@ updateLocation ( name, location ) model =
 
 {-| Command to save the entire layout: positions and rotations.
 -}
-saveCmd : List ( Name, Piece.Model ) -> Cmd Msg
-saveCmd pieces =
+saveCmd : String -> List ( Name, Piece.Model ) -> Cmd Msg
+saveCmd name pieces =
     layoutEncoder pieces
         |> JE.encode 0
-        |> LocalStorage.set "tangram"
+        |> LocalStorage.set ("tangram" ++ "-" ++ name)
         |> Task.perform (always Error) (always NoOp)
