@@ -1,7 +1,8 @@
-module Tangram.Model exposing (Model, init, tangramPieces)
+module Tangram.Model exposing (Model, init, subscriptions, tangramPieces)
 
 import Task
 import Window
+import Keyboard
 import Mouse
 import LocalStorage
 
@@ -52,3 +53,23 @@ tangramPieces =
     , ( "square", (Piece.init (Piece.Square (Colors.elmGreen) 100.0) (Piece.Position 250 250) 180) )
     , ( "para", (Piece.init (Piece.Parallelogram (Colors.elmGreen) 100.0) (Piece.Position 175 175) 180) )
     ]
+
+
+{-| Gather the subscriptions of each of the components into a single Batch.
+-}
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    let
+        mapSubs ( name, piece ) =
+            Piece.subscriptions piece |> Sub.map (PieceMsg name)
+
+        reSize =
+            Window.resizes WindowSize
+
+        keyDowns =
+            Keyboard.downs KeyDown
+
+        keyUps =
+            Keyboard.ups KeyUp
+    in
+        [ keyUps, keyDowns, reSize ] ++ List.map mapSubs model.pieces |> Sub.batch
