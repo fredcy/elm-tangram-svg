@@ -14,7 +14,7 @@ import LocalStorage
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg |> Debug.log "msg" of
+    case msg  of
         PieceMsg name pieceMsg ->
             let
                 context =
@@ -29,7 +29,7 @@ update msg model =
             let
                 -- Allow for horizontal margin (?) and give vertical room for additional content
                 width =
-                    wsize.width - 16
+                    wsize.width - 32
 
                 height =
                     wsize.height - 300

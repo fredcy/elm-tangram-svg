@@ -21,25 +21,44 @@ view model =
         realPosition =
             getPosition model
 
+        pos =
+            ( toFloat realPosition.x, toFloat realPosition.y )
+
+        { color } =
+            shapeInfo model.shape
+    in
+        Svg.svg [ VirtualDom.on "mousedown" (Json.map DragStart offsetPosition) ]
+            [ polygon2 (vertices model) color pos model.drag ]
+
+
+vertices : Model -> List ( Float, Float )
+vertices model =
+    let
+        { points, scale } =
+            shapeInfo model.shape
+
+        realPosition =
+            getPosition model
+
         realRotation =
             getRotation model
 
-        ds =
-            model.drag
+        (( px, py ) as position) =
+            ( toFloat realPosition.x, toFloat realPosition.y )
     in
-        Svg.svg
-            [ VirtualDom.on "mousedown" (Json.map DragStart offsetPosition)
-            ]
-            [ case model.shape of
-                Triangle color scale ->
-                    polygon trianglePoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y ) ds
+        points |> List.map (scalePoint scale >> rotatePoint realRotation >> translatePoint position)
 
-                Square color scale ->
-                    polygon squarePoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y ) ds
 
-                Parallelogram color scale ->
-                    polygon paraPoints color scale realRotation ( toFloat realPosition.x, toFloat realPosition.y ) ds
-            ]
+boundingBox : Model -> ( Position, Position )
+boundingBox model =
+    let
+        verts =
+            vertices model
+
+        minx =
+            0
+    in
+        ( Position minx 0, Position 100 100 )
 
 
 {-| Extract the page and offset positions from the mouse event.
@@ -65,6 +84,19 @@ squarePoints =
 
 paraPoints =
     [ ( 0.25, -0.25 ), ( -0.75, -0.25 ), ( -0.25, 0.25 ), ( 0.75, 0.25 ) ]
+
+
+shapeInfo : Shape -> { points : List ( Float, Float ), color : Colors.Color, scale : Float }
+shapeInfo shape =
+    case shape of
+        Triangle color scale ->
+            { points = trianglePoints, color = color, scale = scale }
+
+        Square color scale ->
+            { points = squarePoints, color = color, scale = scale }
+
+        Parallelogram color scale ->
+            { points = paraPoints, color = color, scale = scale }
 
 
 
@@ -140,6 +172,42 @@ polygon shape color scale rotation (( px, py ) as position) drag =
         vertices =
             shape |> List.map (scalePoint scale >> rotatePoint rotation >> translatePoint position)
 
+        cursorVal =
+            case drag of
+                Just (Dragging _) ->
+                    "move"
+
+                Just (Rotating _) ->
+                    "crosshair"
+
+                _ ->
+                    "pointer"
+
+        handle =
+            case drag of
+                Just (Rotating { current }) ->
+                    rotateHandle (Position (round px) (round py)) current
+
+                _ ->
+                    Svg.text ""
+    in
+        Svg.svg []
+            [ Svg.polygon
+                [ points <| pointsToString vertices
+                , fill <| Colors.toCss color
+                , stroke "lightgray"
+                , strokeWidth (toString (6))
+                , strokeLinejoin "round"
+                , cursor cursorVal
+                ]
+                []
+            , handle
+            ]
+
+
+polygon2 : List ( Float, Float ) -> Colors.Color -> ( Float, Float ) -> Maybe Drag -> Svg Msg
+polygon2 vertices color (( px, py ) as position) drag =
+    let
         cursorVal =
             case drag of
                 Just (Dragging _) ->

@@ -66,15 +66,13 @@ update msg model =
                 ( emodel, ecmd ) =
                     Editor.update emsg model.editor
             in
-                -- TODO
                 { model | editor = emodel } ! [ Cmd.map EditorMsg ecmd ]
 
 
 view : Model -> Html Msg
 view model =
     Html.div []
-        [ Tangram.view model.tangram |> Html.map TangramMsg
-        , Editor.view model.editor |> Html.map EditorMsg
+        [ Editor.view model.editor |> Html.map EditorMsg
         ]
 
 
