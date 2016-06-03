@@ -1,4 +1,4 @@
-module Model exposing (..)
+module Tangram.Model exposing (Model, init, tangramPieces)
 
 import Task
 import Window
@@ -9,7 +9,7 @@ import LocalStorage
 --
 
 import Colors
-import Types exposing (..)
+import Tangram.Types exposing (..)
 import Piece.Model as Piece
 import Piece.Types as Piece
 

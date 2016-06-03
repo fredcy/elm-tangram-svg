@@ -1,4 +1,4 @@
-module View exposing (..)
+module Tangram.View exposing (view)
 
 import Html exposing (Html)
 import Html.App as Html
@@ -8,11 +8,11 @@ import Json.Encode as JE
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 import Svg.Lazy exposing (lazy, lazy3)
-import Model exposing (Model)
-import Update exposing (layoutEncoder)
+import Tangram.Model exposing (Model)
+import Tangram.Update exposing (layoutEncoder)
 import Piece.Model as Piece
 import Piece.View as Piece
-import Types exposing (..)
+import Tangram.Types exposing (..)
 
 
 view : Model -> Html.Html Msg

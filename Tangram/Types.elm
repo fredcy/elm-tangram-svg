@@ -1,4 +1,4 @@
-module Types exposing (..)
+module Tangram.Types exposing (..)
 
 import Char exposing (KeyCode)
 import Window

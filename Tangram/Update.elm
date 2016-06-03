@@ -1,10 +1,10 @@
-module Update exposing (update, layoutEncoder)
+module Tangram.Update exposing (update, layoutEncoder)
 
 import Window
 import Json.Encode as JE
 import Json.Decode as JD
-import Model exposing (..)
-import Types exposing (..)
+import Tangram.Model exposing (..)
+import Tangram.Types exposing (..)
 import Task
 import Piece.Model as Piece
 import Piece.Update as Piece
