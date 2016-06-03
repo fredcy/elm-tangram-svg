@@ -15,6 +15,10 @@ import Svg.Attributes exposing (..)
 import VirtualDom
 
 
+type alias Point =
+    ( Float, Float )
+
+
 view : Model -> Svg Msg
 view model =
     let
@@ -31,7 +35,7 @@ view model =
             [ polygon2 (vertices model) color pos model.drag ]
 
 
-vertices : Model -> List ( Float, Float )
+vertices : Model -> List Point
 vertices model =
     let
         { points, scale } =
@@ -49,16 +53,25 @@ vertices model =
         points |> List.map (scalePoint scale >> rotatePoint realRotation >> translatePoint position)
 
 
-boundingBox : Model -> ( Position, Position )
-boundingBox model =
+boundingBox : List Point -> ( Point, Point )
+boundingBox vertices =
     let
-        verts =
-            vertices model
+        ( xs, ys ) =
+            List.unzip vertices
 
         minx =
-            0
+            List.minimum xs |> Maybe.withDefault 0
+
+        maxx =
+            List.minimum xs |> Maybe.withDefault 0
+
+        miny =
+            List.minimum ys |> Maybe.withDefault 0
+
+        maxy =
+            List.minimum ys |> Maybe.withDefault 0
     in
-        ( Position minx 0, Position 100 100 )
+        ( ( minx, miny ), ( maxx, maxy ) )
 
 
 {-| Extract the page and offset positions from the mouse event.
@@ -86,7 +99,7 @@ paraPoints =
     [ ( 0.25, -0.25 ), ( -0.75, -0.25 ), ( -0.25, 0.25 ), ( 0.75, 0.25 ) ]
 
 
-shapeInfo : Shape -> { points : List ( Float, Float ), color : Colors.Color, scale : Float }
+shapeInfo : Shape -> { points : List Point, color : Colors.Color, scale : Float }
 shapeInfo shape =
     case shape of
         Triangle color scale ->
@@ -166,7 +179,7 @@ handleArc center end =
             []
 
 
-polygon : List ( Float, Float ) -> Colors.Color -> Float -> Float -> ( Float, Float ) -> Maybe Drag -> Svg Msg
+polygon : List Point -> Colors.Color -> Float -> Float -> Point -> Maybe Drag -> Svg Msg
 polygon shape color scale rotation (( px, py ) as position) drag =
     let
         vertices =
@@ -205,7 +218,7 @@ polygon shape color scale rotation (( px, py ) as position) drag =
             ]
 
 
-polygon2 : List ( Float, Float ) -> Colors.Color -> ( Float, Float ) -> Maybe Drag -> Svg Msg
+polygon2 : List Point -> Colors.Color -> Point -> Maybe Drag -> Svg Msg
 polygon2 vertices color (( px, py ) as position) drag =
     let
         cursorVal =
@@ -241,7 +254,7 @@ polygon2 vertices color (( px, py ) as position) drag =
             ]
 
 
-rotatePoint : Float -> ( Float, Float ) -> ( Float, Float )
+rotatePoint : Float -> Point -> Point
 rotatePoint angle ( x, y ) =
     let
         x' =
@@ -253,28 +266,28 @@ rotatePoint angle ( x, y ) =
         ( x', y' )
 
 
-scalePoint : Float -> ( Float, Float ) -> ( Float, Float )
+scalePoint : Float -> Point -> Point
 scalePoint factor ( x, y ) =
     ( x * factor, y * factor )
 
 
-translatePoint : ( Float, Float ) -> ( Float, Float ) -> ( Float, Float )
+translatePoint : Point -> Point -> Point
 translatePoint ( dx, dy ) ( x, y ) =
     ( x + dx, y + dy )
 
 
 {-| Construct the value needed for the SVG `points` attribute.
 -}
-pointsToString : List ( Float, Float ) -> String
+pointsToString : List Point -> String
 pointsToString list =
     List.map (\( x, y ) -> toString x ++ " " ++ toString y) list |> String.join " "
 
 
-toPoint : Position -> ( Float, Float )
+toPoint : Position -> Point
 toPoint position =
     ( toFloat position.x, toFloat position.y )
 
 
-toPosition : ( Float, Float ) -> Position
+toPosition : Point -> Position
 toPosition ( px, py ) =
     Position (round px) (round py)
