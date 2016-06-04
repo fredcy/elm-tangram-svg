@@ -1,4 +1,4 @@
-module Piece.View exposing (view)
+module Piece.View exposing (Point, view, vertices, boundingBox, offsetPosition)
 
 import Colors
 import Piece.Model exposing (Model, getPosition, getRotation)
@@ -35,6 +35,8 @@ view model =
             [ polygon2 (vertices model) color pos model.drag ]
 
 
+{-| Get final vertex locations for the shape, as points.
+-}
 vertices : Model -> List Point
 vertices model =
     let
@@ -53,6 +55,8 @@ vertices model =
         points |> List.map (scalePoint scale >> rotatePoint realRotation >> translatePoint position)
 
 
+{-| Origin and corner of minimal bounding box.
+-}
 boundingBox : List Point -> ( Point, Point )
 boundingBox vertices =
     let
@@ -63,15 +67,31 @@ boundingBox vertices =
             List.minimum xs |> Maybe.withDefault 0
 
         maxx =
-            List.minimum xs |> Maybe.withDefault 0
+            List.maximum xs |> Maybe.withDefault 0
 
         miny =
             List.minimum ys |> Maybe.withDefault 0
 
         maxy =
-            List.minimum ys |> Maybe.withDefault 0
+            List.maximum ys |> Maybe.withDefault 0
     in
         ( ( minx, miny ), ( maxx, maxy ) )
+
+
+{-| Scale and translate the points so that they just fit in a unit box.
+-}
+normalizeVertices : List Point -> List Point
+normalizeVertices vertices =
+    let
+        ( ( minx, miny ), ( maxx, maxy ) ) =
+            boundingBox vertices
+
+        scale =
+            Basics.max (maxx - minx) (maxy - miny)
+    in
+        vertices
+            |> List.map (translatePoint ( -minx, -miny ))
+            |> List.map (scalePoint (1 / scale))
 
 
 {-| Extract the page and offset positions from the mouse event.
@@ -83,9 +103,10 @@ offsetPosition =
         (Json.object2 Position ("offsetX" := Json.int) ("offsetY" := Json.int))
 
 
-{-| Define the vertices of the shapes.  Define each such that origin at their
-50% point so that rotation is natural. Triangle is defined with the hypotenuse
-is horizontal.
+{-| Define the base (unscaled, unrotated) vertices of the shapes.  Define each
+such that origin is at their 50% point so that rotation is natural. Triangle is
+defined with the hypotenuse on the bottom. Square and parallelogram are oriented
+as in the default tangram shape.
 -}
 trianglePoints =
     [ ( 0, -0.5 ), ( 1, 0.5 ), ( -1, 0.5 ) ]

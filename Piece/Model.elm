@@ -10,6 +10,7 @@ module Piece.Model
         , locationEncoder
         , locationDecoder
         , withLocation
+        , move
         )
 
 import Mouse
@@ -151,3 +152,14 @@ subscriptions model =
 
         Just _ ->
             Sub.batch [ Mouse.moves DragAt, Mouse.ups DragEnd ]
+
+
+move : (Float, Float) -> Model -> Model
+move (dx, dy) model =
+    let
+        newX =
+            model.position.x + round dx
+        newY =
+            model.position.y + round dy
+    in
+      { model | position = Position newX newY }

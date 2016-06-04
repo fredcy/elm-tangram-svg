@@ -1,4 +1,4 @@
-module Tangram.Update exposing (update, layoutEncoder)
+module Tangram.Update exposing (update, layoutEncoder, moveToOrigin)
 
 import Window
 import Json.Encode as JE
@@ -9,12 +9,13 @@ import Task
 import Piece.Model as Piece
 import Piece.Update as Piece
 import Piece.Types as Piece
+import Piece.View as Piece
 import LocalStorage
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg  of
+    case msg of
         PieceMsg name pieceMsg ->
             let
                 context =
@@ -152,3 +153,25 @@ saveCmd name pieces =
         |> JE.encode 0
         |> LocalStorage.set ("tangram" ++ "-" ++ name)
         |> Task.perform (always Error) (always NoOp)
+
+
+bounds : Model -> ( Piece.Point, Piece.Point )
+bounds tangram =
+    List.map (snd >> Piece.vertices) tangram.pieces
+        |> List.concat
+        |> Piece.boundingBox
+
+
+moveToOrigin : Model -> Model
+moveToOrigin model =
+    let
+        ( ( ox, oy ), corner ) =
+            bounds model
+
+        movePiece vector ( name, piece ) =
+            ( name, Piece.move vector piece )
+
+        pieces =
+            List.map (movePiece ( -ox, -oy )) model.pieces
+    in
+        { model | pieces = pieces }
