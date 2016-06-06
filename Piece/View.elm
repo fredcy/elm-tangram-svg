@@ -1,4 +1,12 @@
-module Piece.View exposing (Point, view, vertices, boundingBox, offsetPosition)
+module Piece.View
+    exposing
+        ( Point
+        , view
+        , vertices
+        , boundingBox
+        , offsetPosition
+        , strokeOffset
+        )
 
 import Colors
 import Piece.Model exposing (Model, getPosition, getRotation)
@@ -17,6 +25,11 @@ import VirtualDom
 
 type alias Point =
     ( Float, Float )
+
+
+strokeOffset : Int
+strokeOffset =
+    3
 
 
 view : Model -> Svg Msg
@@ -74,8 +87,13 @@ boundingBox vertices =
 
         maxy =
             List.maximum ys |> Maybe.withDefault 0
+
+        offset =
+            toFloat strokeOffset
     in
-        ( ( minx, miny ), ( maxx, maxy ) )
+        ( ( minx - offset, miny - offset )
+        , ( maxx + offset, maxy + offset )
+        )
 
 
 {-| Scale and translate the points so that they just fit in a unit box.
@@ -230,7 +248,7 @@ polygon shape color scale rotation (( px, py ) as position) drag =
                 [ points <| pointsToString vertices
                 , fill <| Colors.toCss color
                 , stroke "lightgray"
-                , strokeWidth (toString (6))
+                , strokeWidth (toString (1))
                 , strokeLinejoin "round"
                 , cursor cursorVal
                 ]
@@ -266,7 +284,7 @@ polygon2 vertices color (( px, py ) as position) drag =
                 [ points <| pointsToString vertices
                 , fill <| Colors.toCss color
                 , stroke "lightgray"
-                , strokeWidth (toString (6))
+                , strokeWidth (toString (strokeOffset * 2))
                 , strokeLinejoin "round"
                 , cursor cursorVal
                 ]

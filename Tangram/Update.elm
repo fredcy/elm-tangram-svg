@@ -162,8 +162,16 @@ bounds tangram =
         |> Piece.boundingBox
 
 
+{-| Move entire tangram as far left and upward as possible while showing all of
+all pieces.
+-}
 moveToOrigin : Model -> Model
 moveToOrigin model =
+    moveToPosition { x = 0, y = 0 } model
+
+
+moveToPosition : Piece.Position -> Model -> Model
+moveToPosition { x, y } model =
     let
         ( ( ox, oy ), corner ) =
             bounds model
@@ -172,6 +180,6 @@ moveToOrigin model =
             ( name, Piece.move vector piece )
 
         pieces =
-            List.map (movePiece ( -ox, -oy )) model.pieces
+            List.map (movePiece ( toFloat x - ox, toFloat y - oy )) model.pieces
     in
         { model | pieces = pieces }
