@@ -23,8 +23,11 @@ update msg model =
 
                 ( pieces', cmds ) =
                     updatePieces name pieceMsg context model.pieces
+
+                model' =
+                    { model | pieces = pieces' }
             in
-                ( { model | pieces = pieces' }, Cmd.batch (saveCmd model.name pieces' :: cmds) )
+                model' ! (saveCmd model' :: cmds)
 
         WindowSize wsize ->
             let
@@ -53,7 +56,11 @@ update msg model =
                 ( model, Cmd.none )
 
         Reset ->
-            { model | pieces = tangramPieces } ! [ saveCmd model.name tangramPieces ]
+            let
+                model' =
+                    { model | pieces = tangramPieces }
+            in
+                model' ! [ saveCmd model' ]
 
         GetLayout stringMaybe ->
             case stringMaybe of
@@ -147,11 +154,11 @@ updateLocation ( name, location ) model =
 
 {-| Command to save the entire layout: positions and rotations.
 -}
-saveCmd : String -> List ( Name, Piece.Model ) -> Cmd Msg
-saveCmd name pieces =
-    layoutEncoder pieces
+saveCmd : Model -> Cmd Msg
+saveCmd model =
+    layoutEncoder model.pieces
         |> JE.encode 0
-        |> LocalStorage.set ("tangram" ++ "-" ++ name)
+        |> LocalStorage.set (storageName model.name)
         |> Task.perform (always Error) (always NoOp)
 
 

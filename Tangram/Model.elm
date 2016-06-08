@@ -1,4 +1,4 @@
-module Tangram.Model exposing (Model, init, subscriptions, tangramPieces)
+module Tangram.Model exposing (Model, init, subscriptions, tangramPieces, storageName)
 
 import Task
 import Window
@@ -24,6 +24,16 @@ type alias Model =
     }
 
 
+storageName : String -> String
+storageName name =
+    "tangram-" ++ name
+
+
+defaultName : String
+defaultName =
+    "default"
+
+
 init : ( Model, Cmd Msg )
 init =
     let
@@ -34,11 +44,11 @@ init =
           , size = Window.Size 600 600
           , shift = False
           , showingLayout = False
-          , name = "default"
+          , name = defaultName
           }
         , Cmd.batch
             [ Task.perform (always Error) WindowSize Window.size
-            , Task.perform (always Error) GetLayout (LocalStorage.get "tangram")
+            , Task.perform (always Error) GetLayout (LocalStorage.get (storageName defaultName))
             ]
         )
 
