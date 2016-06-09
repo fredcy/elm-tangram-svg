@@ -1,5 +1,6 @@
 module Tangram.Update exposing (update, layoutEncoder, moveToOrigin)
 
+import List.Extra as List
 import Window
 import Json.Encode as JE
 import Json.Decode as JD
@@ -25,7 +26,7 @@ update msg model =
                     updatePieces name pieceMsg context model.pieces
 
                 model' =
-                    { model | pieces = pieces' }
+                    { model | pieces = bringToTop name pieces' }
             in
                 model' ! (saveCmd model' :: cmds)
 
@@ -108,6 +109,30 @@ updatePieces name msg context items =
                 ( item :: items, cmds )
     in
         List.foldr updatePiece ( [], [] ) items
+
+
+bringToTop : Name -> List ( Name, Piece.Model ) -> List ( Name, Piece.Model )
+bringToTop name items =
+    let
+        pieceMaybe =
+            findPiece name items
+    in
+        case pieceMaybe of
+            Just piece ->
+                removePiece name items ++ [ ( name, piece ) ]
+
+            Nothing ->
+                items
+
+
+findPiece : Name -> List ( Name, Piece.Model ) -> Maybe Piece.Model
+findPiece name items =
+    List.find (fst >> ((==) name)) items |> Maybe.map snd
+
+
+removePiece : Name -> List ( Name, Piece.Model ) -> List ( Name, Piece.Model )
+removePiece name items =
+    List.filter (fst >> ((/=) name)) items
 
 
 layoutEncoder : List ( Name, Piece.Model ) -> JE.Value
