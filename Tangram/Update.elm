@@ -31,9 +31,9 @@ update msg model =
 
         WindowSize wsize ->
             let
-                -- Allow for horizontal margin (?) and give vertical room for additional content
+                -- Allow for margin and give vertical room for additional content
                 width =
-                    wsize.width - 32
+                    wsize.width - 16
 
                 height =
                     wsize.height - 300
