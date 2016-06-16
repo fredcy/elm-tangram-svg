@@ -16,7 +16,6 @@ import Piece.Types exposing (..)
 --
 
 import Json.Decode as Json exposing ((:=))
-import Mouse
 import String
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
@@ -126,14 +125,17 @@ such that origin is at their 50% point so that rotation is natural. Triangle is
 defined with the hypotenuse on the bottom. Square and parallelogram are oriented
 as in the default tangram shape.
 -}
+trianglePoints : List ( Float, Float )
 trianglePoints =
     [ ( 0, -0.5 ), ( 1, 0.5 ), ( -1, 0.5 ) ]
 
 
+squarePoints : List ( Float, Float )
 squarePoints =
     [ ( 0, -0.5 ), ( 0.5, 0 ), ( 0, 0.5 ), ( -0.5, 0 ) ]
 
 
+paraPoints : List ( Float, Float )
 paraPoints =
     [ ( 0.25, -0.25 ), ( -0.75, -0.25 ), ( -0.25, 0.25 ), ( 0.75, 0.25 ) ]
 

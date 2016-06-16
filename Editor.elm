@@ -5,7 +5,6 @@ import Html.Events as HE
 import Html.App
 import Json.Decode as JD
 import Mouse
-import Window
 import VirtualDom
 import Tangram.Model as Tangram
 import Tangram.Types as Tangram

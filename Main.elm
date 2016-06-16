@@ -6,7 +6,9 @@ import Editor
 import Tangram.Model as Tangram
 import Tangram.Types as Tangram
 import Tangram.Update as Tangram
-import Tangram.View as Tangram
+
+
+--import Tangram.View as Tangram
 
 
 main : Program Never
