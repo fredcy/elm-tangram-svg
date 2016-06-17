@@ -10,18 +10,16 @@ This program requires the LocalStorage effects module which is not yet published
 cd workdir
 git clone https://github.com/fredcy/elm-tangram-svg.git
 git clone https://github.com/fredcy/localstorage.git
-git clone https://github.com/NoRedInk/elm-ops-tooling.git
+git clone https://github.com/fredcy/elm-tools.git
 
 cd elm-tangram-svg
 
-# Do initial build. It will fail with an error about 'LocalStorage'
-make
+# Create a localized copy of the localstorage package.
 
-# Install the module providing LocalStorage as if it were a package.
-# This modifies elm-package.json and elm-stuff.
-../elm-ops-tooling/elm_self_publish.py ../localstorage .
+make prepare PYTHON=/usr/local/bin/python27
 
-# Build again; this should now work.
+# Build elm-tangram-svg
+
 make
 ```
 

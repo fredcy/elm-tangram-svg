@@ -60,6 +60,7 @@ background cursorV w h =
         []
 
 
+cursorVal : Model -> String
 cursorVal model =
     if List.any (Piece.rotating << snd) model.pieces then
         "crosshair"

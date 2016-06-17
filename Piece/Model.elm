@@ -15,7 +15,6 @@ module Piece.Model
 
 import Mouse
 import Piece.Types exposing (..)
-import Svg exposing (Svg)
 import Json.Encode as JE
 import Json.Decode as JD exposing ((:=))
 

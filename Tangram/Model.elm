@@ -3,7 +3,6 @@ module Tangram.Model exposing (Model, init, subscriptions, tangramPieces, storag
 import Task
 import Window
 import Keyboard
-import Mouse
 import LocalStorage
 
 

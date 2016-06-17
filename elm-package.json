@@ -4,8 +4,10 @@
     "repository": "https://github.com/fredcy/elm-tangram-svg.git",
     "license": "BSD3",
     "source-directories": [
-        "."
+        ".",
+	"gen/localstorage/src"
     ],
+    "native-modules": true,
     "exposed-modules": [],
     "dependencies": {
         "elm-community/list-extra": "2.0.1 <= v < 3.0.0",
