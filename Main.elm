@@ -9,6 +9,10 @@ import Tangram.Update as Tangram
 
 
 --import Tangram.View as Tangram
+{- I have both Editor and Tangram as components here to test that we can have
+   both a simple (eventually) static view of a tangram and an interactive editor of
+   tangrams.
+-}
 
 
 main : Program Never

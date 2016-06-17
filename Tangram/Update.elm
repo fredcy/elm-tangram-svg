@@ -148,7 +148,11 @@ updateLocations : Result String (List ( Name, Piece.Location )) -> Model -> Mode
 updateLocations locationsResult model =
     case locationsResult of
         Ok locations ->
-            List.foldr updateLocation model locations
+            let
+                pieces' =
+                    List.map (updatePieceLayout model.pieces) locations
+            in
+                { model | pieces = pieces' }
 
         _ ->
             model
@@ -159,22 +163,20 @@ locationsDecoder =
     JD.list <| JD.tuple2 (,) JD.string Piece.locationDecoder
 
 
-{-| Change the location of the named piece.
+{-| Find named piece in list of named pieces and update its location.
 -}
-updateLocation : ( Name, Piece.Location ) -> Model -> Model
-updateLocation ( name, location ) model =
+updatePieceLayout : List ( Name, Piece.Model ) -> ( Name, Piece.Location ) -> ( Name, Piece.Model )
+updatePieceLayout pieces ( name, location ) =
     let
-        updatePiece : ( Name, Piece.Model ) -> ( Name, Piece.Model )
-        updatePiece ( nameP, piece ) =
-            if name == nameP then
-                ( nameP, Piece.withLocation location piece )
-            else
-                ( nameP, piece )
-
-        pieces' =
-            List.map updatePiece model.pieces
+        pieceM =
+            List.find ((==) name << fst) pieces
     in
-        { model | pieces = pieces' }
+        case pieceM of
+            Just ( name, piece ) ->
+                ( name, Piece.withLocation location piece )
+
+            _ ->
+                Debug.crash "piece not found" name
 
 
 {-| Command to save the entire layout: positions and rotations.
