@@ -32,8 +32,23 @@ locationEncoder : Model -> JE.Value
 locationEncoder model =
     JE.object
         [ ( "position", positionEncoder model.position )
-        , ( "rotation", JE.float model.rotation )
+        , ( "rotation", JE.float ((normalizeAngle >> asTurns) model.rotation) )
         ]
+
+
+asTurns : Float -> Float
+asTurns radians =
+    radians / (2 * pi)
+
+
+normalizeAngle : Float -> Float
+normalizeAngle angle =
+    if angle >= 2 * pi then
+        normalizeAngle (angle - 2 * pi)
+    else if angle < 0 then
+        normalizeAngle (angle + 2 * pi)
+    else
+        angle
 
 
 positionEncoder : Position -> JE.Value
@@ -54,7 +69,7 @@ locationDecoder : JD.Decoder Location
 locationDecoder =
     JD.object2 Location
         ("position" := positionDecoder)
-        ("rotation" := JD.float)
+        (("rotation" := JD.float) |> JD.map turns)
 
 
 positionDecoder : JD.Decoder Position
@@ -71,7 +86,7 @@ withLocation { position, rotation } piece =
 
 init : Shape -> Position -> Rotation -> Model
 init shape position rotation =
-    Model shape position (degrees rotation) Nothing (Position 0 0)
+    Model shape position (turns rotation) Nothing (Position 0 0)
 
 
 getPosition : Model -> Position
@@ -153,12 +168,13 @@ subscriptions model =
             Sub.batch [ Mouse.moves DragAt, Mouse.ups DragEnd ]
 
 
-move : (Float, Float) -> Model -> Model
-move (dx, dy) model =
+move : ( Float, Float ) -> Model -> Model
+move ( dx, dy ) model =
     let
         newX =
             model.position.x + round dx
+
         newY =
             model.position.y + round dy
     in
-      { model | position = Position newX newY }
+        { model | position = Position newX newY }

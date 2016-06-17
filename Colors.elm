@@ -37,6 +37,11 @@ white =
     Color.white
 
 
+ugliest : Color
+ugliest =
+    rgb 0x4A 0x41 0x2A
+
+
 toCss : Color -> String
 toCss color =
     let
