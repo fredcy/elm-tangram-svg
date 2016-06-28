@@ -3,10 +3,15 @@ module Tangram.Types exposing (..)
 import Char exposing (KeyCode)
 import Window
 import Piece.Types as Piece
+import Piece.Model as Piece
 
 
 type alias Name =
     String
+
+
+type alias SavedTangram =
+    List ( Name, Piece.Location )
 
 
 type Msg
@@ -15,6 +20,7 @@ type Msg
     | KeyDown KeyCode
     | KeyUp KeyCode
     | GetLayout (Maybe String)
+    | UpdateLocations String
     | ToggleLayout
     | SetName String
     | Reset

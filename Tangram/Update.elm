@@ -66,14 +66,17 @@ update msg model =
         GetLayout stringMaybe ->
             case stringMaybe of
                 Just json ->
-                    let
-                        locations =
-                            JD.decodeString locationsDecoder json
-                    in
-                        updateLocations locations model ! []
+                    update (UpdateLocations json) model
 
                 _ ->
                     model ! []
+
+        UpdateLocations json ->
+            let
+                locations =
+                    JD.decodeString locationsDecoder json
+            in
+                updateLocations locations model ! []
 
         ToggleLayout ->
             { model | showingLayout = not model.showingLayout } ! []
