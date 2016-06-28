@@ -192,6 +192,9 @@ saveCmd model =
         |> Task.perform (always Error) (always NoOp)
 
 
+{-| Get bounding box of entire tangram by collecting all vertices of all pieces
+and then finding the extremes.
+-}
 bounds : Model -> ( Piece.Point, Piece.Point )
 bounds tangram =
     List.map (snd >> Piece.vertices) tangram.pieces
@@ -207,16 +210,22 @@ moveToOrigin model =
     moveToPosition { x = 0, y = 0 } model
 
 
+{-| Move all pieces by same vector so as to put the origin of bounding box at
+   the given position.
+-}
 moveToPosition : Piece.Position -> Model -> Model
 moveToPosition { x, y } model =
     let
-        ( ( ox, oy ), corner ) =
+        ( ( ox, oy ), _ ) =
             bounds model
 
-        movePiece vector ( name, piece ) =
+        vector =
+            ( toFloat x - ox, toFloat y - oy )
+
+        movePiece ( name, piece ) =
             ( name, Piece.move vector piece )
 
         pieces =
-            List.map (movePiece ( toFloat x - ox, toFloat y - oy )) model.pieces
+            List.map movePiece model.pieces
     in
         { model | pieces = pieces }

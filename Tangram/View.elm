@@ -21,7 +21,6 @@ view model =
         [ Html.h1 [] [ Html.text "Elm Tangram: drag&drop with SVG" ]
         , Html.div [] [ Html.text "Drag to move, shift-drag to rotate. Saved to localStorage." ]
         , scene model
-        , resetButton
         , showLayoutButton model
         , nameView model
         , if model.showingLayout then
@@ -76,12 +75,6 @@ debugInfo model =
         , Html.ul []
             (List.map (\item -> Html.li [] [ (Html.text << toString) item ]) model.pieces)
         ]
-
-
-resetButton : Html.Html Msg
-resetButton =
-    Html.button [ Html.Events.onClick Reset ]
-        [ Html.text "reset" ]
 
 
 showLayoutButton : Model -> Html Msg

@@ -28,6 +28,7 @@ type Msg
     = TangramMsg Tangram.Msg
     | MousePos ( Mouse.Position, Mouse.Position )
     | MoveToOrigin
+    | Reset
     | Open
     | SavedTangrams (List Tangram.Name)
     | OpenTangram Tangram.Name
@@ -61,6 +62,13 @@ update msg model =
         MoveToOrigin ->
             { model | tangram = Tangram.moveToOrigin model.tangram } ! []
 
+        Reset ->
+            let
+                ( tangram', tangramCmd ) =
+                    Tangram.update Tangram.Reset model.tangram
+            in
+                { model | tangram = tangram' } ! [ Cmd.map TangramMsg tangramCmd ]
+
         Open ->
             { model | opening = True } ! [ Task.perform Error SavedTangrams getSavedTangrams ]
 
@@ -74,10 +82,10 @@ update msg model =
             case stringMaybe of
                 Just json ->
                     let
-                        (tangram', cmd) =
+                        ( tangram', cmd ) =
                             Tangram.update (Tangram.UpdateLocations json) model.tangram
                     in
-                        { model | tangram = tangram' } ! [ cmd |> Cmd.map TangramMsg ]
+                        { model | tangram = tangram', opening = False } ! [ cmd |> Cmd.map TangramMsg ]
 
                 _ ->
                     model ! []
@@ -89,7 +97,7 @@ update msg model =
 getSavedTangrams : Task.Task LocalStorage.Error (List String)
 getSavedTangrams =
     LocalStorage.keys
-        `Task.andThen` (\keys -> Task.succeed (List.filter (String.startsWith "tangram-") keys))
+        `Task.andThen` (List.filter (String.startsWith "tangram-") >> Task.succeed)
 
 
 view : Model -> Html Msg
@@ -100,9 +108,10 @@ view model =
         [ Tangram.view model.tangram |> Html.App.map TangramMsg
         , Html.div []
             [ Html.button [ HE.onClick MoveToOrigin ] [ Html.text "move to origin" ]
+            , Html.button [ HE.onClick Reset ] [ Html.text "reset" ]
             , Html.button [ HE.onClick Open ] [ Html.text "open" ]
             ]
-        , Html.div [] [ Html.text <| toString model.pointer ]
+          --, Html.div [] [ Html.text <| toString model.pointer ]
         , openView model
         ]
 
@@ -127,8 +136,3 @@ savedTangramView savedTangram =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Tangram.subscriptions model.tangram |> Sub.map TangramMsg
-
-
-todo : x -> x
-todo x =
-    Debug.log "TODO" x
