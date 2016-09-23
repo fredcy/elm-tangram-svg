@@ -249,7 +249,7 @@ polygon shape color scale rotation (( px, py ) as position) drag =
             [ Svg.polygon
                 [ points <| pointsToString vertices
                 , fill <| Colors.toCss color
-                , stroke "lightgray"
+                , stroke "red"
                 , strokeWidth (toString (1))
                 , strokeLinejoin "round"
                 , cursor cursorVal
@@ -285,7 +285,7 @@ polygon2 vertices color (( px, py ) as position) drag =
             [ Svg.polygon
                 [ points <| pointsToString vertices
                 , fill <| Colors.toCss color
-                , stroke "lightgray"
+                , stroke "#eeeeee"
                 , strokeWidth (toString (strokeOffset * 2))
                 , strokeLinejoin "round"
                 , cursor cursorVal

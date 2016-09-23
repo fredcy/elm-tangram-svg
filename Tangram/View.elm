@@ -5,6 +5,7 @@ import Html.App as Html
 import Html.Attributes as HA
 import Html.Events
 import Json.Encode as JE
+import String
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 import Svg.Lazy exposing (lazy, lazy3)
@@ -94,10 +95,17 @@ exportView : Model -> Html Msg
 exportView model =
     Html.textarea
         [ HA.class "exportView"
-        , HA.rows 4
+        , HA.rows 7
+        , HA.cols 70
         ]
         [ layoutEncoder model.pieces
-            |> JE.encode 2
+            |> JE.encode 0
+            |> String.split "],["
+            |> String.join "],\n["
+            |> String.split ","
+            |> String.join ", "
+            |> String.split ":"
+            |> String.join ": "
             |> Html.text
         ]
 
