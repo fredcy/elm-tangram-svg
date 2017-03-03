@@ -28,6 +28,7 @@ view model =
           else
             Html.text ""
           -- , debugInfo model
+        , errorsView model.errors
         ]
 
 
@@ -116,3 +117,15 @@ nameView model =
         , HA.value model.name
         ]
         []
+
+
+errorsView : List String -> Html Msg
+errorsView errors =
+    let
+        errorView error =
+            Html.li [] [ Html.text error ]
+    in
+        Html.div []
+            [ Html.h4 [] [ Html.text "Errors" ]
+            , Html.ol [] (List.map errorView errors)
+            ]

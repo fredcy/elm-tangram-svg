@@ -20,6 +20,7 @@ type alias Model =
     , shift : Bool
     , showingLayout : Bool
     , name : String
+    , errors : List String
     }
 
 
@@ -44,6 +45,7 @@ init =
           , shift = False
           , showingLayout = False
           , name = defaultName
+          , errors = []
           }
         , Cmd.batch
             [ Task.perform WindowSize Window.size

@@ -33,7 +33,6 @@ type Msg
     | SavedTangrams (Result LocalStorage.Error (List Tangram.Name))
     | OpenTangram Tangram.Name
     | LoadTangram (Result LocalStorage.Error (Maybe String))
-    | Error LocalStorage.Error
 
 
 init : Tangram.Model -> ( Model, Cmd Msg )
@@ -99,9 +98,6 @@ update msg model =
 
                 Err _ ->
                     model ! []
-
-        Error error ->
-            model ! []
 
 
 getSavedTangrams : Task.Task LocalStorage.Error (List String)

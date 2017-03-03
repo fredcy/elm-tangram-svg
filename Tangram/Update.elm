@@ -74,14 +74,19 @@ update msg model =
                             model ! []
 
                 Err error ->
-                    model ! []
+                    { model | errors = toString error :: model.errors } ! []
 
         UpdateLocations json ->
             let
-                locations =
+                locationsResult =
                     JD.decodeString locationsDecoder json
             in
-                updateLocations locations model ! []
+                case locationsResult of
+                    Ok locations ->
+                        updateLocations locations model ! []
+
+                    Err error ->
+                        { model | errors = error :: model.errors } ! []
 
         ToggleLayout ->
             { model | showingLayout = not model.showingLayout } ! []
@@ -147,28 +152,23 @@ layoutEncoder : List ( Name, Piece.Model ) -> JE.Value
 layoutEncoder pieces =
     let
         help ( name, piece ) =
-            JE.list [ JE.string name, Piece.locationEncoder piece ]
+            ( name, Piece.locationEncoder piece )
     in
-        JE.list (List.map help pieces)
+        JE.object (List.map help pieces)
 
 
-updateLocations : Result String (List ( Name, Piece.Location )) -> Model -> Model
-updateLocations locationsResult model =
-    case locationsResult of
-        Ok locations ->
-            let
-                pieces_ =
-                    List.map (updatePieceLayout model.pieces) locations
-            in
-                { model | pieces = pieces_ }
-
-        _ ->
-            model
+updateLocations : List ( Name, Piece.Location ) -> Model -> Model
+updateLocations locations model =
+    let
+        pieces_ =
+            List.map (updatePieceLayout model.pieces) locations
+    in
+        { model | pieces = pieces_ }
 
 
 locationsDecoder : JD.Decoder (List ( Name, Piece.Location ))
 locationsDecoder =
-    JD.list <| JD.map2 (,) JD.string Piece.locationDecoder
+    JD.keyValuePairs Piece.locationDecoder
 
 
 {-| Find named piece in list of named pieces and update its location.
