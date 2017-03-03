@@ -46,8 +46,8 @@ init =
           , name = defaultName
           }
         , Cmd.batch
-            [ Task.perform (always Error) WindowSize Window.size
-            , Task.perform (always Error) GetLayout (LocalStorage.get (storageName defaultName))
+            [ Task.perform WindowSize Window.size
+            , Task.attempt GetLayout (LocalStorage.get (storageName defaultName))
             ]
         )
 

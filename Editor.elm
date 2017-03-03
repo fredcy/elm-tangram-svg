@@ -1,8 +1,8 @@
 module Editor exposing (Model, Msg(TangramMsg), init, update, view, subscriptions)
 
 import Html exposing (Html)
+import Svg
 import Html.Events as HE
-import Html.App
 import Json.Decode as JD
 import Mouse
 import VirtualDom
@@ -30,9 +30,9 @@ type Msg
     | MoveToOrigin
     | Reset
     | Open
-    | SavedTangrams (List Tangram.Name)
+    | SavedTangrams (Result LocalStorage.Error (List Tangram.Name))
     | OpenTangram Tangram.Name
-    | LoadTangram (Maybe String)
+    | LoadTangram (Result LocalStorage.Error (Maybe String))
     | Error LocalStorage.Error
 
 
@@ -64,30 +64,40 @@ update msg model =
 
         Reset ->
             let
-                ( tangram', tangramCmd ) =
+                ( tangram_, tangramCmd ) =
                     Tangram.update Tangram.Reset model.tangram
             in
-                { model | tangram = tangram' } ! [ Cmd.map TangramMsg tangramCmd ]
+                { model | tangram = tangram_ } ! [ Cmd.map TangramMsg tangramCmd ]
 
         Open ->
-            { model | opening = True } ! [ Task.perform Error SavedTangrams getSavedTangrams ]
+            { model | opening = True } ! [ Task.attempt SavedTangrams getSavedTangrams ]
 
-        SavedTangrams savedTangrams ->
-            { model | savedTangrams = savedTangrams } ! []
+        SavedTangrams savedTangramsResult ->
+            case savedTangramsResult of
+                Ok savedTangrams ->
+                    { model | savedTangrams = savedTangrams } ! []
+
+                Err error ->
+                    model ! []
 
         OpenTangram tangramName ->
-            model ! [ LocalStorage.get tangramName |> Task.perform Error LoadTangram ]
+            model ! [ LocalStorage.get tangramName |> Task.attempt LoadTangram ]
 
-        LoadTangram stringMaybe ->
-            case stringMaybe of
-                Just json ->
-                    let
-                        ( tangram', cmd ) =
-                            Tangram.update (Tangram.UpdateLocations json) model.tangram
-                    in
-                        { model | tangram = tangram', opening = False } ! [ cmd |> Cmd.map TangramMsg ]
+        LoadTangram stringMaybeResult ->
+            case stringMaybeResult of
+                Ok stringMaybe ->
+                    case stringMaybe of
+                        Just json ->
+                            let
+                                ( tangram_, cmd ) =
+                                    Tangram.update (Tangram.UpdateLocations json) model.tangram
+                            in
+                                { model | tangram = tangram_, opening = False } ! [ cmd |> Cmd.map TangramMsg ]
 
-                _ ->
+                        _ ->
+                            model ! []
+
+                Err _ ->
                     model ! []
 
         Error error ->
@@ -97,15 +107,15 @@ update msg model =
 getSavedTangrams : Task.Task LocalStorage.Error (List String)
 getSavedTangrams =
     LocalStorage.keys
-        `Task.andThen` (List.filter (String.startsWith "tangram-") >> Task.succeed)
+        |> Task.andThen (List.filter (String.startsWith "tangram-") >> Task.succeed)
 
 
 view : Model -> Html Msg
 view model =
-    Html.svg
+    Html.div
         [-- VirtualDom.on "mousemove" (JD.map MousePos Piece.offsetPosition)
         ]
-        [ Tangram.view model.tangram |> Html.App.map TangramMsg
+        [ Tangram.view model.tangram |> Html.map TangramMsg
         , Html.div []
             [ Html.button [ HE.onClick MoveToOrigin ] [ Html.text "move to origin" ]
             , Html.button [ HE.onClick Reset ] [ Html.text "reset" ]

@@ -1,7 +1,6 @@
 module Tangram.View exposing (view)
 
 import Html exposing (Html)
-import Html.App as Html
 import Html.Attributes as HA
 import Html.Events
 import Json.Encode as JE
@@ -62,7 +61,7 @@ background cursorV w h =
 
 cursorVal : Model -> String
 cursorVal model =
-    if List.any (Piece.rotating << snd) model.pieces then
+    if List.any (Piece.rotating << Tuple.second) model.pieces then
         "crosshair"
     else
         "default"

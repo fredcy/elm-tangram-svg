@@ -4,6 +4,7 @@ import Char exposing (KeyCode)
 import Window
 import Piece.Types as Piece
 import Piece.Model as Piece
+import LocalStorage
 
 
 type alias Name =
@@ -19,7 +20,7 @@ type Msg
     | WindowSize Window.Size
     | KeyDown KeyCode
     | KeyUp KeyCode
-    | GetLayout (Maybe String)
+    | GetLayout (Result LocalStorage.Error (Maybe String))
     | UpdateLocations String
     | ToggleLayout
     | SetName String

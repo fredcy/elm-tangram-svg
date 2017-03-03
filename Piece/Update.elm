@@ -7,10 +7,10 @@ import Piece.Model exposing (Model, getPosition, getRotation)
 update : Context -> Msg -> Model -> ( Model, Cmd c )
 update context msg model =
     let
-        model' =
+        model_ =
             updateHelp context msg model
     in
-        ( model', Cmd.none )
+        ( model_, Cmd.none )
 
 
 positionDiff : Position -> Position -> Position

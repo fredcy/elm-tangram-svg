@@ -16,7 +16,7 @@ module Piece.Model
 import Mouse
 import Piece.Types exposing (..)
 import Json.Encode as JE
-import Json.Decode as JD exposing ((:=))
+import Json.Decode as JD
 
 
 type alias Model =
@@ -67,16 +67,16 @@ type alias Location =
 
 locationDecoder : JD.Decoder Location
 locationDecoder =
-    JD.object2 Location
-        ("position" := positionDecoder)
-        (("rotation" := JD.float) |> JD.map turns)
+    JD.map2 Location
+        (JD.field "position" positionDecoder)
+        ((JD.field "rotation" JD.float) |> JD.map turns)
 
 
 positionDecoder : JD.Decoder Position
 positionDecoder =
-    JD.object2 Position
-        ("x" := JD.int)
-        ("y" := JD.int)
+    JD.map2 Position
+        (JD.field "x" JD.int)
+        (JD.field "y" JD.int)
 
 
 withLocation : Location -> Model -> Model

@@ -22,13 +22,13 @@ update msg model =
                 context =
                     { shift = model.shift, size = model.size }
 
-                ( pieces', cmds ) =
+                ( pieces_, cmds ) =
                     updatePieces name pieceMsg context model.pieces
 
-                model' =
-                    { model | pieces = bringToTop name pieces' }
+                model_ =
+                    { model | pieces = bringToTop name pieces_ }
             in
-                model' ! (saveCmd model' :: cmds)
+                model_ ! (saveCmd model_ :: cmds)
 
         WindowSize wsize ->
             let
@@ -58,17 +58,22 @@ update msg model =
 
         Reset ->
             let
-                model' =
+                model_ =
                     { model | pieces = tangramPieces }
             in
-                model' ! [ saveCmd model' ]
+                model_ ! [ saveCmd model_ ]
 
-        GetLayout stringMaybe ->
-            case stringMaybe of
-                Just json ->
-                    update (UpdateLocations json) model
+        GetLayout stringMaybeResult ->
+            case stringMaybeResult of
+                Ok stringMaybe ->
+                    case stringMaybe of
+                        Just json ->
+                            update (UpdateLocations json) model
 
-                _ ->
+                        _ ->
+                            model ! []
+
+                Err error ->
                     model ! []
 
         UpdateLocations json ->
@@ -104,10 +109,10 @@ updatePieces name msg context items =
         updatePiece (( pieceName, piece ) as item) ( items, cmds ) =
             if pieceName == name then
                 let
-                    ( piece', cmd ) =
+                    ( piece_, cmd ) =
                         Piece.update context msg piece
                 in
-                    ( ( pieceName, piece' ) :: items, Cmd.map (PieceMsg name) cmd :: cmds )
+                    ( ( pieceName, piece_ ) :: items, Cmd.map (PieceMsg name) cmd :: cmds )
             else
                 ( item :: items, cmds )
     in
@@ -130,12 +135,12 @@ bringToTop name items =
 
 findPiece : Name -> List ( Name, Piece.Model ) -> Maybe Piece.Model
 findPiece name items =
-    List.find (fst >> ((==) name)) items |> Maybe.map snd
+    List.find (Tuple.first >> ((==) name)) items |> Maybe.map Tuple.second
 
 
 removePiece : Name -> List ( Name, Piece.Model ) -> List ( Name, Piece.Model )
 removePiece name items =
-    List.filter (fst >> ((/=) name)) items
+    List.filter (Tuple.first >> ((/=) name)) items
 
 
 layoutEncoder : List ( Name, Piece.Model ) -> JE.Value
@@ -152,10 +157,10 @@ updateLocations locationsResult model =
     case locationsResult of
         Ok locations ->
             let
-                pieces' =
+                pieces_ =
                     List.map (updatePieceLayout model.pieces) locations
             in
-                { model | pieces = pieces' }
+                { model | pieces = pieces_ }
 
         _ ->
             model
@@ -163,7 +168,7 @@ updateLocations locationsResult model =
 
 locationsDecoder : JD.Decoder (List ( Name, Piece.Location ))
 locationsDecoder =
-    JD.list <| JD.tuple2 (,) JD.string Piece.locationDecoder
+    JD.list <| JD.map2 (,) JD.string Piece.locationDecoder
 
 
 {-| Find named piece in list of named pieces and update its location.
@@ -172,7 +177,7 @@ updatePieceLayout : List ( Name, Piece.Model ) -> ( Name, Piece.Location ) -> ( 
 updatePieceLayout pieces ( name, location ) =
     let
         pieceM =
-            List.find ((==) name << fst) pieces
+            List.find ((==) name << Tuple.first) pieces
     in
         case pieceM of
             Just ( name, piece ) ->
@@ -189,7 +194,7 @@ saveCmd model =
     layoutEncoder model.pieces
         |> JE.encode 0
         |> LocalStorage.set (storageName model.name)
-        |> Task.perform (always Error) (always NoOp)
+        |> Task.attempt (always NoOp)
 
 
 {-| Get bounding box of entire tangram by collecting all vertices of all pieces
@@ -197,7 +202,7 @@ and then finding the extremes.
 -}
 bounds : Model -> ( Piece.Point, Piece.Point )
 bounds tangram =
-    List.map (snd >> Piece.vertices) tangram.pieces
+    List.map (Tuple.second >> Piece.vertices) tangram.pieces
         |> List.concat
         |> Piece.boundingBox
 

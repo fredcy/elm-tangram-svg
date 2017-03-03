@@ -15,7 +15,7 @@ import Piece.Types exposing (..)
 
 --
 
-import Json.Decode as Json exposing ((:=))
+import Json.Decode as Json
 import String
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
@@ -115,9 +115,9 @@ normalizeVertices vertices =
 -}
 offsetPosition : Json.Decoder ( Position, Position )
 offsetPosition =
-    Json.object2 (,)
-        (Json.object2 Position ("pageX" := Json.int) ("pageY" := Json.int))
-        (Json.object2 Position ("offsetX" := Json.int) ("offsetY" := Json.int))
+    Json.map2 (,)
+        (Json.map2 Position (Json.field "pageX" Json.int) (Json.field "pageY" Json.int))
+        (Json.map2 Position (Json.field "offsetX" Json.int) (Json.field "offsetY" Json.int))
 
 
 {-| Define the base (unscaled, unrotated) vertices of the shapes.  Define each
@@ -209,7 +209,7 @@ handleArc center end =
             end |> toPoint |> translatePoint (scalePoint -1 centerPt) |> rotatePoint (arcAngle / 2) |> translatePoint centerPt |> toPosition
 
         dVal =
-            ds "M" [ fst arcbegin, snd arcbegin ]
+            ds "M" [ Tuple.first arcbegin, Tuple.second arcbegin ]
                 ++ ds "A" [ radius, radius, 0, 0, 1, toFloat arcend.x, toFloat arcend.y ]
                 |> Debug.log "dVal"
     in
@@ -298,13 +298,13 @@ polygon2 vertices color (( px, py ) as position) drag =
 rotatePoint : Float -> Point -> Point
 rotatePoint angle ( x, y ) =
     let
-        x' =
+        x_ =
             x * cos angle - y * sin angle
 
-        y' =
+        y_ =
             x * sin angle + y * cos angle
     in
-        ( x', y' )
+        ( x_, y_ )
 
 
 scalePoint : Float -> Point -> Point
